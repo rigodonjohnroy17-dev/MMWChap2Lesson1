@@ -385,10 +385,24 @@ function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function load(){ try{ const r=localStorage.getItem(STORAGE_KEY); if(r){ state={...state,...JSON.parse(r)}; return true; } }catch(e){} return false; }
 function resetProgress(){ if(confirm('Reset all progress?')){ localStorage.removeItem(STORAGE_KEY); state={name:'',xp:0,completed:{},progress:{},badges:{},actCorrect:0,actTotal:0,assessCorrect:0,assessTotal:0,assessDone:false,started:false}; showScreen('start'); document.getElementById('btn-continue').style.display='none'; } }
 
-function recordActivity(correct){
-  state.actTotal++;
-  if(correct) state.actCorrect++;
+// Maximum number of scored activity items in the chapter
+const ACTIVITY_MAX = 35;
+
+function recordActivity(correct) {
+  // Only record the FIRST attempt for scoring purposes
+  // Once we have reached the maximum number of first attempts, ignore further calls
+  if (state.actTotal >= ACTIVITY_MAX) return;
+
+  state.actTotal++;                 // count this as one first attempt
+  if (correct) state.actCorrect++;  // only increase if the first try was correct
+
   save();
+}
+
+function getActivityScore() {
+  if (state.actTotal === 0) return 0;
+  // Use the real first-attempt accuracy, capped at ACTIVITY_MAX
+  return Math.round((state.actCorrect / Math.min(state.actTotal, ACTIVITY_MAX)) * 50);
 }
 
 function showScreen(id){
@@ -420,7 +434,6 @@ function awardBadge(id){
 function closeBadge(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('badge-popup').classList.remove('show'); }
 function completeLevel(id){ state.completed[id]=true; addXP(80); awardBadge(id); save(); }
 
-function getActivityScore(){ if(state.actTotal===0) return 0; return Math.round((state.actCorrect / state.actTotal) * 50); }
 function getAssessScore(){ if(state.assessTotal===0) return 0; return Math.round((state.assessCorrect / state.assessTotal) * 50); }
 function getOverallScore(){ return getActivityScore() + getAssessScore(); }
 
@@ -474,7 +487,7 @@ function renderReport(){
     </table>
     <h3>Score Breakdown (50% Activities + 50% Assessment)</h3>
     <table class="report-table">
-      <tr><th>Activities Correct</th><td>${state.actCorrect} / ${state.actTotal}</td></tr>
+      <tr><th>Activities Correct (1st try)</th><td>${state.actCorrect} / ${Math.min(state.actTotal, 35)}</td></tr>
       <tr><th>Activity Accuracy</th><td>${actPct}%</td></tr>
       <tr><th>Activities Score (50%)</th><td><strong>${actScore} pts</strong></td></tr>
       <tr><th>Assessment Correct</th><td>${state.assessCorrect} / ${state.assessTotal || '—'}</td></tr>
