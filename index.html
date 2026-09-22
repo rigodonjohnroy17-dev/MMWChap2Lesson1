@@ -595,10 +595,10 @@ const LEVEL_RENDERERS = {
     const steps=[
       ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Conventions keep mathematical communication consistent.')}<h2>⚙️ Sector 5 — Conventions</h2><p class="math-lg">\\(3 + 4 \\times 5 = 23\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Repair Notation</button></div></div>`; },
       ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Convert these to the conventional form we usually write.')}<h2>Conventional form</h2><div id="conv-q"></div><div class="feedback" id="conv-fb"></div><div class="btn-group"><button class="btn" id="conv-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
-        const qs=[{q:'3 × x',a:['3x']},{q:'a × b',a:['ab']},{q:'x × x × x',a:['x^3','x³']},{q:'x + x + x + x',a:['4x']},{q:'2 × (x + 3)',a:['2(x+3)','2(x + 3)']}];
+        const qs=[{q:'3 ⋅ x',a:['3x']},{q:'a ⋅ b',a:['ab']},{q:'x ⋅ x ⋅ x',a:['x^3','x³']},{q:'x + x + x + x',a:['4x']},{q:'2 ⋅ (x + 3)',a:['2(x+3)','2(x + 3)']}];
         let i=0;
         function show(){ if(i>=qs.length){ document.getElementById('conv-q').innerHTML=makeMascotHTML('celebrating','Notation repaired!')+'<p style="color:var(--success);">✓ Done.</p>'; document.getElementById('conv-next').style.display='inline-flex'; addXP(40); return; }
-          document.getElementById('conv-q').innerHTML=`<p>Convert: <strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="conv-ans" placeholder="conventional"><button class="btn" id="conv-check">Check</button></div>`;
+          document.getElementById('conv-q').innerHTML=`<p>Convert: <strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="conv-ans" placeholder="5x³+1"><button class="btn" id="conv-check">Check</button></div>`;
           document.getElementById('conv-check').onclick=()=>{ let v=document.getElementById('conv-ans').value.replace(/\s+/g,'').toLowerCase().replace('×','*').replace('³','^3'); const ok=qs[i].a.some(a=>a.replace(/\s+/g,'').toLowerCase().replace('³','^3')===v); const fb=document.getElementById('conv-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Accepted.'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},700); } else { fb.className='feedback wrong show'; fb.textContent='Hint: drop × with variables.'; recordActivity(false); } };
         } show(); },
       ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','What is the value of this expression?')}<h2>Order of Operations</h2><p>Evaluate: \\(2 + 3 \\times 4^{2}\\)</p><div class="input-row"><input type="number" id="oo-ans"><button class="btn" onclick="checkOO()">Check</button></div><div class="feedback" id="oo-fb"></div><div class="btn-group"><button class="btn" id="oo-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
@@ -678,82 +678,194 @@ const LEVEL_RENDERERS = {
     ]; steps[Math.min(step,steps.length-1)]();
   },
 
-  ASSESS(container, step){
-    const steps=[
-      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','This is the formal Chapter Assessment. It is worth 50% of your final score. Answer carefully.')}<h2>📋 Chapter Assessment</h2><p>10 questions covering the whole chapter.</p><div class="btn-group"><button class="btn" onclick="nextStep()">Begin Assessment</button></div></div>`; },
-      ()=>{ 
-        if(!state.assessDone){ state.assessCorrect=0; state.assessTotal=0; }
-        container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Take your time. I believe in you!')}<h2>Assessment Questions</h2><div id="ass-q"></div><div class="feedback" id="ass-fb"></div><div class="btn-group"><button class="btn" id="ass-next" style="display:none;" onclick="nextStep()">See Results</button></div></div>`;
-        const qs = [
-          { q: 'Language is a system of symbols, words, signs and rules used to communicate.', a: 'true', type: 'tf' },
-          { q: 'Is “2x + 7” an expression or a sentence?', a: 'expression', type: 'text' },
-          { q: 'What is the conventional form of 3 × x?', a: '3x', type: 'text' },
-          { q: 'Evaluate: 2 + 3 × 4', a: '14', type: 'text' },
-          { q: 'Write the roster form of {x | x is a positive integer and x < 4}', a: '{1,2,3}', type: 'text' },
-          { q: 'Is {(1,5),(2,5),(3,7)} a function? (yes/no)', a: 'yes', type: 'text' },
-          { q: 'Is {(1,2),(1,5)} a function? (yes/no)', a: 'no', type: 'text' },
-          { q: 'What is the additive identity?', a: '0', type: 'text' },
-          { q: 'Which property is shown by a + b = b + a?', a: 'commutative', type: 'text' },
-          { q: 'Is addition closed on the set {1,2,3,4}? (yes/no)', a: 'no', type: 'text' }
-        ];
-        let i = 0;
-        function show(){
-          if(i >= qs.length){
-            state.assessDone = true; save();
-            document.getElementById('ass-q').innerHTML = makeMascotHTML('celebrating',`You finished the assessment! ${state.assessCorrect}/${qs.length} correct.`) + `<p style="color:var(--success);">Assessment complete!</p>`;
-            document.getElementById('ass-next').style.display = 'inline-flex';
-            return;
-          }
-          const item = qs[i];
-          let html = `<p><strong>Question ${i+1} of ${qs.length}</strong></p><p>${item.q}</p>`;
-          if(item.type === 'tf'){
-            html += `<div class="choice-grid"><div class="choice-btn" data-a="true">True</div><div class="choice-btn" data-a="false">False</div></div>`;
-          } else {
-            html += `<div class="input-row"><input type="text" id="ass-ans" placeholder="Your answer"><button class="btn" id="ass-check">Submit</button></div>`;
-          }
-          document.getElementById('ass-q').innerHTML = html;
-          if(item.type === 'tf'){
-            document.querySelectorAll('.choice-btn').forEach(btn => {
-              btn.onclick = () => {
-                const correct = btn.dataset.a === item.a;
-                state.assessTotal++;
-                if(correct){ state.assessCorrect++; btn.classList.add('correct'); document.getElementById('ass-fb').className='feedback correct show'; document.getElementById('ass-fb').textContent='✓ Correct'; }
-                else { btn.classList.add('wrong'); document.getElementById('ass-fb').className='feedback wrong show'; document.getElementById('ass-fb').textContent='Incorrect.'; }
-                save();
-                setTimeout(()=>{ i++; show(); document.getElementById('ass-fb').className='feedback'; }, 900);
-              };
-            });
-          } else {
-            document.getElementById('ass-check').onclick = () => {
-              let v = document.getElementById('ass-ans').value.trim().toLowerCase().replace(/\s+/g,'');
-              let target = item.a.toLowerCase().replace(/\s+/g,'');
-              if(item.a === '{1,2,3}' && (v==='{1,2,3}'||v==='{3,2,1}')) v = '{1,2,3}';
-              if(item.a === 'commutative' && v.includes('commuta')) v = 'commutative';
-              const correct = v === target;
-              state.assessTotal++;
-              if(correct){ state.assessCorrect++; document.getElementById('ass-fb').className='feedback correct show'; document.getElementById('ass-fb').textContent='✓ Correct'; }
-              else { document.getElementById('ass-fb').className='feedback wrong show'; document.getElementById('ass-fb').textContent='Incorrect.'; }
-              save();
-              setTimeout(()=>{ i++; show(); document.getElementById('ass-fb').className='feedback'; }, 900);
-            };
-          }
-        }
-        show();
-      },
-      ()=>{ 
-        const assScore = getAssessScore();
-        container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Assessment complete! Check your score below.')}<h2>Assessment Results</h2>
-          <div class="score-box"><div style="font-size:0.9rem;color:var(--muted);">Assessment Score (50% of final)</div><div class="big">${assScore} / 50</div><p style="margin-top:8px;">${state.assessCorrect} out of ${state.assessTotal} correct</p></div>
-          <div class="btn-group"><button class="btn btn-success" onclick="finishAssess()">Complete Assessment</button></div></div>`; 
+ASSESS(container, step){
+  const steps = [
+    // ========== Step 0: Introduction ==========
+    () => {
+      if (state.assessDone) {
+        // Already taken → jump straight to feedback
+        setStep(2);
+        return;
       }
-    ];
-    steps[Math.min(step,steps.length-1)]();
-  },
+      container.innerHTML = `
+        <div class="card">
+          ${makeMascotHTML('greeting', 'This is the Chapter Assessment. It is worth 50% of your final score and can be taken only once. Answer carefully.')}
+          <h2>📋 Chapter Assessment</h2>
+          <p><strong>Math 113 · Mathematics in the Modern World</strong><br>
+          Chapter 2: The Language of Mathematics</p>
+          <p>Directions: Choose the letter of the best answer. You will see all 30 questions on one page. After you submit, you will receive detailed feedback, then you may proceed to the Master Code.</p>
+          <p style="color:var(--warn);font-weight:600;">⚠ This assessment can be taken only once.</p>
+          <div class="btn-group">
+            <button class="btn" onclick="nextStep()">Start Assessment</button>
+          </div>
+        </div>`;
+    },
+
+    // ========== Step 1: All 30 questions ==========
+    () => {
+      if (state.assessDone) {
+        setStep(2);
+        return;
+      }
+
+      const questions = [
+        {q:"1. Which best describes a language?", opts:["A collection of random symbols","A system used to communicate ideas and information","A set of numbers used for calculations","A method used only for speaking"], ans:1},
+        {q:"2. In communication, the information or idea being conveyed is called the:", opts:["Sender","Medium","Message","Receiver"], ans:2},
+        {q:"3. Which is an example of a mathematical message?", opts:['"Please wait outside."','"The machine is broken."',"A = lw",'"Good morning!"'], ans:2},
+        {q:"4. Why can mathematical symbols be considered part of a language?", opts:["They are easier to draw than letters.","They allow mathematical ideas to be communicated using agreed-upon meanings.","They are used only by scientists.","They always have only one possible interpretation."], ans:1},
+        {q:"5. Before modern calculators and computers, people developed different systems for representing numbers. Which is an example?", opts:["Binary code","Roman numerals","Computer programming","Digital display"], ans:1},
+        {q:"6. What is the main reason ancient number systems were developed?", opts:["To create computer programs","To communicate and record quantities","To replace spoken languages","To make mathematics more difficult"], ans:1},
+        {q:"7. A trader records the quantity of goods using tally marks: ||||| |||  How many goods are recorded?", opts:["7","8","9","10"], ans:1},
+        {q:"8. Which statement best explains why different civilizations developed different mathematical symbols?", opts:["Mathematics had no meaning before modern times.","Different societies created systems appropriate for communicating and recording quantities.","Ancient people did not understand numbers.","All civilizations used exactly the same symbols."], ans:1},
+        {q:"9. Which characteristic of mathematical language means that it communicates an idea using relatively few symbols?", opts:["Precision","Conciseness","Ambiguity","Approximation"], ans:1},
+        {q:"10. Which characteristic means that a mathematical statement can communicate an idea with a specific and exact meaning?", opts:["Precision","Conciseness","Creativity","Decoration"], ans:0},
+        {q:'11. "The rectangle has a length of 8 cm and a width of 5 cm." Which expression communicates the area more concisely?', opts:["8+5","8-5","8(5)","8/5"], ans:2},
+        {q:'12. Best mathematical translation of: "The total cost is the price per item multiplied by the number of items."', opts:["C = p + n","C = p - n","C = pn","C = p / n"], ans:2},
+        {q:"13. Which is a mathematical expression rather than a mathematical sentence?", opts:["5 + 7 = 12","x + 3 = 10","4(6)","9 > 4"], ans:2},
+        {q:"14. Which is a mathematical sentence?", opts:["3x + 2","7(4)","x - 5","3x + 2 = 11"], ans:3},
+        {q:"15. Conventional way of writing the product of 6 and x?", opts:["6 + x","6x","x6","6 = x"], ans:1},
+        {q:"16. Which expression is equivalent to x × x × x?", opts:["3x","x + 3","x³","3ˣ"], ans:2},
+        {q:"17. Most conventional form of 1 × x?", opts:["1x","x","x¹","1 + x"], ans:1},
+        {q:"18. Which statement is TRUE?", opts:["3x means 3 + x.","x² means x + 2.","4(x + 2) means 4 multiplied by the entire quantity x + 2.","x + x means x²."], ans:2},
+        {q:"19. Properly written set in roster notation?", opts:["A = {1, 2, 3, 4}","A = (1, 2, 3, 4)","A = [1, 2, 3, 4]","A = 1, 2, 3, 4"], ans:0},
+        {q:"20. Let A = {2, 4, 6, 8, 10}. Which is TRUE?", opts:["3 ∈ A","6 ∈ A","7 ∈ A","12 ∈ A"], ans:1},
+        {q:"21. Let B = {1, 3, 5, 7, 9}. Which is TRUE?", opts:["4 ∈ B","6 ∈ B","9 ∈ B","10 ∈ B"], ans:2},
+        {q:"22. Set-builder notation for {2, 4, 6, 8, 10}?", opts:["{x | x is an odd number less than 10}","{x | x is an even number from 2 to 10}","{x | x is a prime number less than 10}","{x | x is a whole number greater than 10}"], ans:1},
+        {q:"23. The symbol ∈ means:", opts:['"is greater than"','"is equal to"','"is an element of"','"is not equal to"'], ans:2},
+        {q:"24. Let A = {1, 2}, B = {3, 4}. Which is an element of A × B?", opts:["(3, 1)","(4, 2)","(1, 3)","(3, 4)"], ans:2},
+        {q:"25. Which ordered pair has reversed order compared with the others?", opts:["(1, 4)","(2, 5)","(3, 6)","(4, 1)"], ans:3},
+        {q:"26. A relation can be understood as:", opts:["A connection between elements","A number with no value","An equation that must always have one answer","A set containing only numbers"], ans:0},
+        {q:"27. Which relation is a function?", opts:["{(1,2), (1,4), (2,5)}","{(1,3), (2,3), (3,5)}","{(2,1), (2,4), (3,6)}","{(4,2), (4,3), (4,5)}"], ans:1},
+        {q:"28. Why is {(1,5), (2,5), (3,7)} a function?", opts:["Every output is different.","Every input is different.","Every input is paired with exactly one output.","Every output is paired with exactly one input."], ans:2},
+        {q:"29. A function is best described as:", opts:["Any collection of numbers","A relation in which each input has exactly one output","A relation in which every output must be different","A relation in which every input has several outputs"], ans:1},
+        {q:"30. Which property is shown by 3 + 7 = 7 + 3?", opts:["Associative property","Commutative property","Identity property","Distributive property"], ans:1}
+      ];
+
+      // Store questions so we can reuse them on the feedback page
+      window._assessQuestions = questions;
+
+      let html = `
+        <div class="card">
+          ${makeMascotHTML('thinking', 'Answer all 30 questions. This is your only attempt.')}
+          <h2>📋 Chapter Assessment (30 items)</h2>
+          <p style="font-size:0.9rem;color:var(--muted);margin-bottom:16px;">Choose the best answer for each question. Scroll down to submit.</p>
+          <div id="assessment-form">`;
+
+      questions.forEach((item, idx) => {
+        html += `
+          <div style="margin:16px 0;padding:14px;background:var(--panel2);border-radius:10px;border:1px solid rgba(245,197,24,0.15);">
+            <p style="font-weight:600;margin-bottom:10px;">${item.q}</p>
+            <div style="display:flex;flex-direction:column;gap:6px;">`;
+        item.opts.forEach((opt, oIdx) => {
+          html += `
+            <label style="display:flex;align-items:center;padding:10px 12px;background:#0a1f4d;border-radius:8px;cursor:pointer;border:1px solid transparent;">
+              <input type="radio" name="q${idx}" value="${oIdx}" style="margin-right:10px;accent-color:var(--gold);transform:scale(1.2);">
+              <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+            </label>`;
+        });
+        html += `</div></div>`;
+      });
+
+      html += `
+          </div>
+          <div class="btn-group" style="margin-top:24px;">
+            <button class="btn btn-success" id="btn-submit-assess" style="width:100%;font-size:1.05rem;">Submit Assessment (1 Attempt Only)</button>
+          </div>
+          <div class="feedback" id="ass-fb"></div>
+        </div>`;
+
+      container.innerHTML = html;
+
+      document.getElementById('btn-submit-assess').onclick = () => {
+        let correct = 0;
+        let answered = 0;
+        const studentAnswers = [];
+
+        questions.forEach((item, idx) => {
+          const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+          if (selected) {
+            answered++;
+            const chosen = parseInt(selected.value);
+            studentAnswers.push(chosen);
+            if (chosen === item.ans) correct++;
+          } else {
+            studentAnswers.push(null); // unanswered
+          }
+        });
+
+        if (answered < 30) {
+          const fb = document.getElementById('ass-fb');
+          fb.className = 'feedback wrong show';
+          fb.textContent = `Please answer all 30 questions before submitting. You have answered ${answered}/30.`;
+          return;
+        }
+
+        // Save results permanently
+        state.assessCorrect = correct;
+        state.assessTotal = 30;
+        state.assessDone = true;
+        state.assessAnswers = studentAnswers; // store choices for feedback
+        save();
+
+        // Go to feedback page
+        setStep(2);
+      };
+    },
+
+    // ========== Step 2: Detailed Feedback Page ==========
+    () => {
+      const questions = window._assessQuestions || [];
+      const studentAnswers = state.assessAnswers || [];
+      const correctCount = state.assessCorrect;
+      const score50 = Math.round((correctCount / 30) * 50);
+
+      let feedbackHTML = `
+        <div class="card">
+          ${makeMascotHTML('celebrating', `Assessment complete! You scored ${correctCount}/30.`)}
+          <h2>Assessment Results & Feedback</h2>
+          <div class="score-box">
+            <div style="font-size:0.9rem;color:var(--muted);">Your Score</div>
+            <div class="big">${correctCount} / 30</div>
+            <p style="margin-top:6px;">This contributes <strong>${score50} points</strong> (out of 50) to your final grade.</p>
+          </div>
+          <p style="margin:12px 0 16px;color:var(--muted);font-size:0.9rem;">Below is the detailed feedback for every item. Green = correct, Red = incorrect.</p>
+      `;
+
+      questions.forEach((item, idx) => {
+        const studentChoice = studentAnswers[idx];
+        const isCorrect = studentChoice === item.ans;
+        const studentLetter = studentChoice !== null ? String.fromCharCode(65 + studentChoice) : "—";
+        const correctLetter = String.fromCharCode(65 + item.ans);
+
+        feedbackHTML += `
+          <div style="margin:12px 0;padding:12px 14px;border-radius:10px;border:1px solid ${isCorrect ? 'var(--success)' : 'var(--danger)'};background:${isCorrect ? 'rgba(0,230,118,0.08)' : 'rgba(255,82,82,0.08)'};">
+            <p style="font-weight:600;margin-bottom:6px;">${item.q}</p>
+            <p style="font-size:0.9rem;margin-bottom:4px;">
+              Your answer: <strong>${studentLetter}. ${studentChoice !== null ? item.opts[studentChoice] : '(no answer)'}</strong>
+              ${isCorrect ? ' <span style="color:var(--success);">✓ Correct</span>' : ' <span style="color:var(--danger);">✗ Incorrect</span>'}
+            </p>
+            ${!isCorrect ? `<p style="font-size:0.9rem;color:var(--gold);">Correct answer: <strong>${correctLetter}. ${item.opts[item.ans]}</strong></p>` : ''}
+          </div>`;
+      });
+
+      feedbackHTML += `
+          <div class="btn-group" style="margin-top:24px;">
+            <button class="btn btn-success" onclick="finishAssess()" style="width:100%;">Proceed to Master Code</button>
+          </div>
+          <p style="text-align:center;margin-top:12px;font-size:0.85rem;color:var(--muted);">Assessment is locked. You cannot retake it.</p>
+        </div>`;
+
+      container.innerHTML = feedbackHTML;
+    }
+  ];
+
+  steps[Math.min(step, steps.length - 1)]();
+},
 
   FINAL(container, step){
     const steps=[
       ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','You have completed everything. Claim the Master Code!')}<h2>🔑 Final Mission — Master Code</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Claim Master Code</button></div></div>`; },
-      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','MASTER CODE ACCEPTED! You are now a Master of the Language of Mathematics.')}<h2>Master Code Recovered</h2><p style="font-size:1.3rem;color:var(--gold);text-align:center;margin:20px 0;">MATH-LANG-CITE113</p><div class="btn-group"><button class="btn btn-success" onclick="finishFinal()">Finish Adventure</button></div></div>`; }
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','MASTER CODE ACCEPTED! You are now a Master of the Language of Mathematics.')}<h2>Master Code Recovered</h2><p style="font-size:1.3rem;color:var(--gold);text-align:center;margin:20px 0;">CITE-MATH113</p><div class="btn-group"><button class="btn btn-success" onclick="finishFinal()">Finish Adventure</button></div></div>`; }
     ]; steps[Math.min(step,steps.length-1)]();
   }
 };
