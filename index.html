@@ -679,21 +679,131 @@ const LEVEL_RENDERERS = {
   },
 
 ASSESS(container, step){
+  // ========== 70-QUESTION TEST BANK ==========
+  const TEST_BANK = [
+    // Original 1–30
+    {q:"1. Which best describes a language?", opts:["A collection of random symbols","A system used to communicate ideas and information","A set of numbers used for calculations","A method used only for speaking"], ans:1},
+    {q:"2. In communication, the information or idea being conveyed is called the:", opts:["Sender","Medium","Message","Receiver"], ans:2},
+    {q:"3. Which is an example of a mathematical message?", opts:['"Please wait outside."','"The machine is broken."',"A = lw",'"Good morning!"'], ans:2},
+    {q:"4. Why can mathematical symbols be considered part of a language?", opts:["They are easier to draw than letters.","They allow mathematical ideas to be communicated using agreed-upon meanings.","They are used only by scientists.","They always have only one possible interpretation."], ans:1},
+    {q:"5. Before modern calculators and computers, people developed different systems for representing numbers. Which is an example?", opts:["Binary code","Roman numerals","Computer programming","Digital display"], ans:1},
+    {q:"6. What is the main reason ancient number systems were developed?", opts:["To create computer programs","To communicate and record quantities","To replace spoken languages","To make mathematics more difficult"], ans:1},
+    {q:"7. A trader records the quantity of goods using tally marks: ||||| |||  How many goods are recorded?", opts:["7","8","9","10"], ans:1},
+    {q:"8. Which statement best explains why different civilizations developed different mathematical symbols?", opts:["Mathematics had no meaning before modern times.","Different societies created systems appropriate for communicating and recording quantities.","Ancient people did not understand numbers.","All civilizations used exactly the same symbols."], ans:1},
+    {q:"9. Which characteristic of mathematical language means that it communicates an idea using relatively few symbols?", opts:["Precision","Conciseness","Ambiguity","Approximation"], ans:1},
+    {q:"10. Which characteristic means that a mathematical statement can communicate an idea with a specific and exact meaning?", opts:["Precision","Conciseness","Creativity","Decoration"], ans:0},
+    {q:'11. "The rectangle has a length of 8 cm and a width of 5 cm." Which expression communicates the area more concisely?', opts:["8+5","8-5","8(5)","8/5"], ans:2},
+    {q:'12. Best mathematical translation of: "The total cost is the price per item multiplied by the number of items."', opts:["C = p + n","C = p - n","C = pn","C = p / n"], ans:2},
+    {q:"13. Which is a mathematical expression rather than a mathematical sentence?", opts:["5 + 7 = 12","x + 3 = 10","4(6)","9 > 4"], ans:2},
+    {q:"14. Which is a mathematical sentence?", opts:["3x + 2","7(4)","x - 5","3x + 2 = 11"], ans:3},
+    {q:"15. Conventional way of writing the product of 6 and x?", opts:["6 + x","6x","x6","6 = x"], ans:1},
+    {q:"16. Which expression is equivalent to x × x × x?", opts:["3x","x + 3","x³","3ˣ"], ans:2},
+    {q:"17. Most conventional form of 1 × x?", opts:["1x","x","x¹","1 + x"], ans:1},
+    {q:"18. Which statement is TRUE?", opts:["3x means 3 + x.","x² means x + 2.","4(x + 2) means 4 multiplied by the entire quantity x + 2.","x + x means x²."], ans:2},
+    {q:"19. Properly written set in roster notation?", opts:["A = {1, 2, 3, 4}","A = (1, 2, 3, 4)","A = [1, 2, 3, 4]","A = 1, 2, 3, 4"], ans:0},
+    {q:"20. Let A = {2, 4, 6, 8, 10}. Which is TRUE?", opts:["3 ∈ A","6 ∈ A","7 ∈ A","12 ∈ A"], ans:1},
+    {q:"21. Let B = {1, 3, 5, 7, 9}. Which is TRUE?", opts:["4 ∈ B","6 ∈ B","9 ∈ B","10 ∈ B"], ans:2},
+    {q:"22. Set-builder notation for {2, 4, 6, 8, 10}?", opts:["{x | x is an odd number less than 10}","{x | x is an even number from 2 to 10}","{x | x is a prime number less than 10}","{x | x is a whole number greater than 10}"], ans:1},
+    {q:"23. The symbol ∈ means:", opts:['"is greater than"','"is equal to"','"is an element of"','"is not equal to"'], ans:2},
+    {q:"24. Let A = {1, 2}, B = {3, 4}. Which is an element of A × B?", opts:["(3, 1)","(4, 2)","(1, 3)","(3, 4)"], ans:2},
+    {q:"25. Which ordered pair has reversed order compared with the others?", opts:["(1, 4)","(2, 5)","(3, 6)","(4, 1)"], ans:3},
+    {q:"26. A relation can be understood as:", opts:["A connection between elements","A number with no value","An equation that must always have one answer","A set containing only numbers"], ans:0},
+    {q:"27. Which relation is a function?", opts:["{(1,2), (1,4), (2,5)}","{(1,3), (2,3), (3,5)}","{(2,1), (2,4), (3,6)}","{(4,2), (4,3), (4,5)}"], ans:1},
+    {q:"28. Why is {(1,5), (2,5), (3,7)} a function?", opts:["Every output is different.","Every input is different.","Every input is paired with exactly one output.","Every output is paired with exactly one input."], ans:2},
+    {q:"29. A function is best described as:", opts:["Any collection of numbers","A relation in which each input has exactly one output","A relation in which every output must be different","A relation in which every input has several outputs"], ans:1},
+    {q:"30. Which property is shown by 3 + 7 = 7 + 3?", opts:["Associative property","Commutative property","Identity property","Distributive property"], ans:1},
+
+    // New questions 31–70
+    {q:"31. Which of the following is an example of a non-mathematical language?", opts:["3 + 5 = 8","x > 10","Please submit your assignment.","A = πr²"], ans:2},
+    {q:"32. What makes a mathematical language different from ordinary spoken language?", opts:["It uses only numbers.","It uses symbols and conventions to communicate mathematical ideas precisely.","It cannot be written down.","It is used only by mathematicians."], ans:1},
+    {q:"33. Which mathematical statement means 'seven is greater than three'?", opts:["7 < 3","7 = 3","7 > 3","7 ≤ 3"], ans:2},
+    {q:"34. Which symbol means 'less than or equal to'?", opts:["<","≤",">","≥"], ans:1},
+    {q:"35. Which statement is an example of a mathematical sentence?", opts:["5x + 2","8 × 4","12 - 7 = 5","3y"], ans:2},
+    {q:"36. Which statement is NOT a mathematical sentence?", opts:["4 + 6 = 10","x + 5 = 12","9 > 2","3x + 4"], ans:3},
+    {q:"37. What does the expression 5x represent?", opts:["5 + x","5 divided by x","5 multiplied by x","x minus 5"], ans:2},
+    {q:"38. Which expression represents 'the sum of x and 9'?", opts:["x - 9","9x","x + 9","x/9"], ans:2},
+    {q:"39. Which expression represents 'three times a number n'?", opts:["n + 3","n - 3","3n","n/3"], ans:2},
+    {q:"40. Which expression represents 'a number x decreased by 4'?", opts:["4 - x","x + 4","4x","x - 4"], ans:3},
+    {q:"41. Which expression represents 'twice the sum of x and 5'?", opts:["2x + 5","2(x + 5)","x + 10","2x - 5"], ans:1},
+    {q:"42. Which expression is equivalent to 2 × a × b?", opts:["2 + ab","2ab","a + 2b","2(a + b)"], ans:1},
+    {q:"43. Which is the correct conventional form of x × 7?", opts:["x7","7x","x + 7","7 = x"], ans:1},
+    {q:"44. What is the value of 2³?", opts:["5","6","8","9"], ans:2},
+    {q:"45. Which expression means 'x raised to the fourth power'?", opts:["4x","x + 4","x⁴","4ˣ"], ans:2},
+    {q:"46. Which expression represents x × x × x × x × x?", opts:["5x","x⁵","x + 5","5ˣ"], ans:1},
+    {q:"47. In the expression 7x², what is the coefficient of x²?", opts:["2","7","x","x²"], ans:1},
+    {q:"48. In the expression 4y + 9, which is the constant term?", opts:["4","y","4y","9"], ans:3},
+    {q:"49. Which expression contains a variable?", opts:["15","8 + 2","6x + 1","20"], ans:2},
+    {q:"50. Which set is written correctly in roster notation?", opts:["A = {2, 4, 6, 8}","A = (2, 4, 6, 8)","A = [2, 4, 6, 8]","A = 2, 4, 6, 8"], ans:0},
+    {q:"51. Let C = {red, blue, green}. Which statement is TRUE?", opts:["red ∈ C","yellow ∈ C","blue ∉ C","green ∉ C"], ans:0},
+    {q:"52. Let D = {10, 20, 30, 40}. Which statement is FALSE?", opts:["10 ∈ D","20 ∈ D","25 ∈ D","40 ∈ D"], ans:2},
+    {q:"53. Which set contains only positive even numbers less than 10?", opts:["{1, 2, 3, 4, 5}","{2, 4, 6, 8}","{1, 3, 5, 7, 9}","{2, 4, 6, 8, 10}"], ans:1},
+    {q:"54. Which set-builder notation describes the set {1, 2, 3, 4, 5}?", opts:["{x | x is a whole number from 1 to 5}","{x | x is an even number from 1 to 5}","{x | x is a prime number less than 5}","{x | x is greater than 5}"], ans:0},
+    {q:"55. Which symbol means 'is not an element of'?", opts:["∈","∉","⊂","="], ans:1},
+    {q:"56. If A = {2, 4, 6} and B = {1, 3, 5}, which statement is TRUE?", opts:["2 ∈ B","3 ∈ A","4 ∈ A","6 ∈ B"], ans:2},
+    {q:"57. If A = {a, b} and B = {1, 2}, which ordered pair belongs to A × B?", opts:["(1, a)","(a, 1)","(2, b)","(b, 2)"], ans:1},
+    {q:"58. If A = {1, 2} and B = {3, 4}, how many ordered pairs are in A × B?", opts:["2","3","4","6"], ans:2},
+    {q:"59. If A = {1, 2, 3} and B = {a, b}, which is NOT an element of A × B?", opts:["(1, a)","(2, b)","(3, a)","(a, 3)"], ans:3},
+    {q:"60. What is important about the order in an ordered pair?", opts:["Order does not matter.","The first and second elements have different positions.","Only the second element matters.","Both elements must be equal."], ans:1},
+    {q:"61. Which of the following is a relation represented by ordered pairs?", opts:["{(1,2), (2,4), (3,6)}","{1, 2, 3, 4}","1 + 2 = 3","x + 5"], ans:0},
+    {q:"62. Which relation is NOT a function?", opts:["{(1,2), (2,3), (3,4)}","{(1,5), (2,5), (3,5)}","{(1,2), (1,3), (2,4)}","{(2,4), (3,6), (4,8)}"], ans:2},
+    {q:"63. In a function, each input must be paired with:", opts:["Exactly one output","At least two outputs","No output","Every possible output"], ans:0},
+    {q:"64. Which relation represents a function?", opts:["{(1,2), (1,3), (2,4)}","{(2,5), (3,6), (4,7)}","{(4,1), (4,2), (5,3)}","{(6,2), (6,3), (7,4)}"], ans:1},
+    {q:"65. In the relation {(1,4), (2,4), (3,5)}, what is the output associated with input 2?", opts:["1","2","4","5"], ans:2},
+    {q:"66. Which statement about a function is TRUE?", opts:["An input may have two different outputs.","Different inputs may have the same output.","Every output must have only one input.","All inputs and outputs must be different."], ans:1},
+    {q:"67. Which property is demonstrated by 5 + 8 = 8 + 5?", opts:["Associative property","Commutative property","Distributive property","Identity property"], ans:1},
+    {q:"68. Which property is demonstrated by (2 + 3) + 4 = 2 + (3 + 4)?", opts:["Commutative property","Associative property","Identity property","Distributive property"], ans:1},
+    {q:"69. Which property is demonstrated by 4(3 + 2) = 4(3) + 4(2)?", opts:["Identity property","Commutative property","Associative property","Distributive property"], ans:3},
+    {q:"70. Which statement best describes the role of mathematical conventions?", opts:["They make mathematical expressions longer.","They provide commonly accepted ways of writing and interpreting mathematical ideas.","They allow every person to assign different meanings to symbols.","They are used only in ancient number systems."], ans:1}
+  ];
+
+  // ========== Deterministic selection based on student name ==========
+  function getStudentSeed(name) {
+    let hash = 0;
+    const str = (name || "Explorer").toLowerCase().trim();
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function seededShuffle(array, seed) {
+    const arr = array.map((q, i) => ({...q, originalIndex: i}));
+    let m = arr.length, t, i;
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+    while (m) {
+      i = Math.floor(random() * m--);
+      t = arr[m];
+      arr[m] = arr[i];
+      arr[i] = t;
+    }
+    return arr;
+  }
+
+  // Get the fixed 30 questions for this student
+  function getStudentQuestions() {
+    const seed = getStudentSeed(state.name);
+    const shuffled = seededShuffle(TEST_BANK, seed);
+    return shuffled.slice(0, 30);
+  }
+
   const steps = [
-    // ========== Step 0: Introduction ==========
+    // Step 0 – Introduction
     () => {
       if (state.assessDone) {
-        // Already taken → jump straight to feedback
         setStep(2);
         return;
       }
       container.innerHTML = `
         <div class="card">
-          ${makeMascotHTML('greeting', 'This is the Chapter Assessment. It is worth 50% of your final score and can be taken only once. Answer carefully.')}
+          ${makeMascotHTML('greeting', 'This is the Chapter Assessment. It is worth 50% of your final score and can be taken only once.')}
           <h2>📋 Chapter Assessment</h2>
           <p><strong>Math 113 · Mathematics in the Modern World</strong><br>
           Chapter 2: The Language of Mathematics</p>
-          <p>Directions: Choose the letter of the best answer. You will see all 30 questions on one page. After you submit, you will receive detailed feedback, then you may proceed to the Master Code.</p>
+          <p>You will receive a unique set of 30 questions drawn from a larger bank. Your set is fixed based on your name, so refreshing the page will not change the questions.</p>
           <p style="color:var(--warn);font-weight:600;">⚠ This assessment can be taken only once.</p>
           <div class="btn-group">
             <button class="btn" onclick="nextStep()">Start Assessment</button>
@@ -701,60 +811,29 @@ ASSESS(container, step){
         </div>`;
     },
 
-    // ========== Step 1: All 30 questions ==========
+    // Step 1 – The 30 questions
     () => {
       if (state.assessDone) {
         setStep(2);
         return;
       }
 
-      const questions = [
-        {q:"1. Which best describes a language?", opts:["A collection of random symbols","A system used to communicate ideas and information","A set of numbers used for calculations","A method used only for speaking"], ans:1},
-        {q:"2. In communication, the information or idea being conveyed is called the:", opts:["Sender","Medium","Message","Receiver"], ans:2},
-        {q:"3. Which is an example of a mathematical message?", opts:['"Please wait outside."','"The machine is broken."',"A = lw",'"Good morning!"'], ans:2},
-        {q:"4. Why can mathematical symbols be considered part of a language?", opts:["They are easier to draw than letters.","They allow mathematical ideas to be communicated using agreed-upon meanings.","They are used only by scientists.","They always have only one possible interpretation."], ans:1},
-        {q:"5. Before modern calculators and computers, people developed different systems for representing numbers. Which is an example?", opts:["Binary code","Roman numerals","Computer programming","Digital display"], ans:1},
-        {q:"6. What is the main reason ancient number systems were developed?", opts:["To create computer programs","To communicate and record quantities","To replace spoken languages","To make mathematics more difficult"], ans:1},
-        {q:"7. A trader records the quantity of goods using tally marks: ||||| |||  How many goods are recorded?", opts:["7","8","9","10"], ans:1},
-        {q:"8. Which statement best explains why different civilizations developed different mathematical symbols?", opts:["Mathematics had no meaning before modern times.","Different societies created systems appropriate for communicating and recording quantities.","Ancient people did not understand numbers.","All civilizations used exactly the same symbols."], ans:1},
-        {q:"9. Which characteristic of mathematical language means that it communicates an idea using relatively few symbols?", opts:["Precision","Conciseness","Ambiguity","Approximation"], ans:1},
-        {q:"10. Which characteristic means that a mathematical statement can communicate an idea with a specific and exact meaning?", opts:["Precision","Conciseness","Creativity","Decoration"], ans:0},
-        {q:'11. "The rectangle has a length of 8 cm and a width of 5 cm." Which expression communicates the area more concisely?', opts:["8+5","8-5","8(5)","8/5"], ans:2},
-        {q:'12. Best mathematical translation of: "The total cost is the price per item multiplied by the number of items."', opts:["C = p + n","C = p - n","C = pn","C = p / n"], ans:2},
-        {q:"13. Which is a mathematical expression rather than a mathematical sentence?", opts:["5 + 7 = 12","x + 3 = 10","4(6)","9 > 4"], ans:2},
-        {q:"14. Which is a mathematical sentence?", opts:["3x + 2","7(4)","x - 5","3x + 2 = 11"], ans:3},
-        {q:"15. Conventional way of writing the product of 6 and x?", opts:["6 + x","6x","x6","6 = x"], ans:1},
-        {q:"16. Which expression is equivalent to x × x × x?", opts:["3x","x + 3","x³","3ˣ"], ans:2},
-        {q:"17. Most conventional form of 1 × x?", opts:["1x","x","x¹","1 + x"], ans:1},
-        {q:"18. Which statement is TRUE?", opts:["3x means 3 + x.","x² means x + 2.","4(x + 2) means 4 multiplied by the entire quantity x + 2.","x + x means x²."], ans:2},
-        {q:"19. Properly written set in roster notation?", opts:["A = {1, 2, 3, 4}","A = (1, 2, 3, 4)","A = [1, 2, 3, 4]","A = 1, 2, 3, 4"], ans:0},
-        {q:"20. Let A = {2, 4, 6, 8, 10}. Which is TRUE?", opts:["3 ∈ A","6 ∈ A","7 ∈ A","12 ∈ A"], ans:1},
-        {q:"21. Let B = {1, 3, 5, 7, 9}. Which is TRUE?", opts:["4 ∈ B","6 ∈ B","9 ∈ B","10 ∈ B"], ans:2},
-        {q:"22. Set-builder notation for {2, 4, 6, 8, 10}?", opts:["{x | x is an odd number less than 10}","{x | x is an even number from 2 to 10}","{x | x is a prime number less than 10}","{x | x is a whole number greater than 10}"], ans:1},
-        {q:"23. The symbol ∈ means:", opts:['"is greater than"','"is equal to"','"is an element of"','"is not equal to"'], ans:2},
-        {q:"24. Let A = {1, 2}, B = {3, 4}. Which is an element of A × B?", opts:["(3, 1)","(4, 2)","(1, 3)","(3, 4)"], ans:2},
-        {q:"25. Which ordered pair has reversed order compared with the others?", opts:["(1, 4)","(2, 5)","(3, 6)","(4, 1)"], ans:3},
-        {q:"26. A relation can be understood as:", opts:["A connection between elements","A number with no value","An equation that must always have one answer","A set containing only numbers"], ans:0},
-        {q:"27. Which relation is a function?", opts:["{(1,2), (1,4), (2,5)}","{(1,3), (2,3), (3,5)}","{(2,1), (2,4), (3,6)}","{(4,2), (4,3), (4,5)}"], ans:1},
-        {q:"28. Why is {(1,5), (2,5), (3,7)} a function?", opts:["Every output is different.","Every input is different.","Every input is paired with exactly one output.","Every output is paired with exactly one input."], ans:2},
-        {q:"29. A function is best described as:", opts:["Any collection of numbers","A relation in which each input has exactly one output","A relation in which every output must be different","A relation in which every input has several outputs"], ans:1},
-        {q:"30. Which property is shown by 3 + 7 = 7 + 3?", opts:["Associative property","Commutative property","Identity property","Distributive property"], ans:1}
-      ];
-
-      // Store questions so we can reuse them on the feedback page
-      window._assessQuestions = questions;
+      const questions = getStudentQuestions();
+      window._assessQuestions = questions; // keep for feedback page
 
       let html = `
         <div class="card">
-          ${makeMascotHTML('thinking', 'Answer all 30 questions. This is your only attempt.')}
+          ${makeMascotHTML('thinking', 'Answer all 30 questions carefully. This is your only attempt.')}
           <h2>📋 Chapter Assessment (30 items)</h2>
-          <p style="font-size:0.9rem;color:var(--muted);margin-bottom:16px;">Choose the best answer for each question. Scroll down to submit.</p>
+          <p style="font-size:0.9rem;color:var(--muted);margin-bottom:16px;">
+            Your unique question set · Scroll down to submit when finished.
+          </p>
           <div id="assessment-form">`;
 
       questions.forEach((item, idx) => {
         html += `
           <div style="margin:16px 0;padding:14px;background:var(--panel2);border-radius:10px;border:1px solid rgba(245,197,24,0.15);">
-            <p style="font-weight:600;margin-bottom:10px;">${item.q}</p>
+            <p style="font-weight:600;margin-bottom:10px;">${idx + 1}. ${item.q.replace(/^\d+\.\s*/, '')}</p>
             <div style="display:flex;flex-direction:column;gap:6px;">`;
         item.opts.forEach((opt, oIdx) => {
           html += `
@@ -769,7 +848,9 @@ ASSESS(container, step){
       html += `
           </div>
           <div class="btn-group" style="margin-top:24px;">
-            <button class="btn btn-success" id="btn-submit-assess" style="width:100%;font-size:1.05rem;">Submit Assessment (1 Attempt Only)</button>
+            <button class="btn btn-success" id="btn-submit-assess" style="width:100%;font-size:1.05rem;">
+              Submit Assessment (1 Attempt Only)
+            </button>
           </div>
           <div class="feedback" id="ass-fb"></div>
         </div>`;
@@ -789,7 +870,7 @@ ASSESS(container, step){
             studentAnswers.push(chosen);
             if (chosen === item.ans) correct++;
           } else {
-            studentAnswers.push(null); // unanswered
+            studentAnswers.push(null);
           }
         });
 
@@ -800,49 +881,52 @@ ASSESS(container, step){
           return;
         }
 
-        // Save results permanently
+        // Lock the assessment forever for this student
         state.assessCorrect = correct;
         state.assessTotal = 30;
         state.assessDone = true;
-        state.assessAnswers = studentAnswers; // store choices for feedback
+        state.assessAnswers = studentAnswers;
         save();
 
-        // Go to feedback page
-        setStep(2);
+        setStep(2); // go to feedback
       };
     },
 
-    // ========== Step 2: Detailed Feedback Page ==========
+    // Step 2 – Detailed Feedback
     () => {
-      const questions = window._assessQuestions || [];
+      const questions = window._assessQuestions || getStudentQuestions();
       const studentAnswers = state.assessAnswers || [];
       const correctCount = state.assessCorrect;
       const score50 = Math.round((correctCount / 30) * 50);
 
       let feedbackHTML = `
         <div class="card">
-          ${makeMascotHTML('celebrating', `Assessment complete! You scored ${correctCount}/30.`)}
-          <h2>Assessment Results & Feedback</h2>
+          ${makeMascotHTML('celebrating', `Assessment complete! You scored ${correctCount} out of 30.`)}
+          <h2>Assessment Results & Item Feedback</h2>
           <div class="score-box">
             <div style="font-size:0.9rem;color:var(--muted);">Your Score</div>
             <div class="big">${correctCount} / 30</div>
             <p style="margin-top:6px;">This contributes <strong>${score50} points</strong> (out of 50) to your final grade.</p>
           </div>
-          <p style="margin:12px 0 16px;color:var(--muted);font-size:0.9rem;">Below is the detailed feedback for every item. Green = correct, Red = incorrect.</p>
-      `;
+          <p style="margin:12px 0 16px;color:var(--muted);font-size:0.9rem;">
+            Green = correct · Red = incorrect. Review each item carefully.
+          </p>`;
 
       questions.forEach((item, idx) => {
         const studentChoice = studentAnswers[idx];
         const isCorrect = studentChoice === item.ans;
         const studentLetter = studentChoice !== null ? String.fromCharCode(65 + studentChoice) : "—";
         const correctLetter = String.fromCharCode(65 + item.ans);
+        const cleanQ = item.q.replace(/^\d+\.\s*/, '');
 
         feedbackHTML += `
           <div style="margin:12px 0;padding:12px 14px;border-radius:10px;border:1px solid ${isCorrect ? 'var(--success)' : 'var(--danger)'};background:${isCorrect ? 'rgba(0,230,118,0.08)' : 'rgba(255,82,82,0.08)'};">
-            <p style="font-weight:600;margin-bottom:6px;">${item.q}</p>
+            <p style="font-weight:600;margin-bottom:6px;">${idx + 1}. ${cleanQ}</p>
             <p style="font-size:0.9rem;margin-bottom:4px;">
               Your answer: <strong>${studentLetter}. ${studentChoice !== null ? item.opts[studentChoice] : '(no answer)'}</strong>
-              ${isCorrect ? ' <span style="color:var(--success);">✓ Correct</span>' : ' <span style="color:var(--danger);">✗ Incorrect</span>'}
+              ${isCorrect 
+                ? ' <span style="color:var(--success);">✓ Correct</span>' 
+                : ' <span style="color:var(--danger);">✗ Incorrect</span>'}
             </p>
             ${!isCorrect ? `<p style="font-size:0.9rem;color:var(--gold);">Correct answer: <strong>${correctLetter}. ${item.opts[item.ans]}</strong></p>` : ''}
           </div>`;
@@ -850,9 +934,13 @@ ASSESS(container, step){
 
       feedbackHTML += `
           <div class="btn-group" style="margin-top:24px;">
-            <button class="btn btn-success" onclick="finishAssess()" style="width:100%;">Proceed to Master Code</button>
+            <button class="btn btn-success" onclick="finishAssess()" style="width:100%;">
+              Proceed to Master Code
+            </button>
           </div>
-          <p style="text-align:center;margin-top:12px;font-size:0.85rem;color:var(--muted);">Assessment is locked. You cannot retake it.</p>
+          <p style="text-align:center;margin-top:12px;font-size:0.85rem;color:var(--muted);">
+            Assessment is locked. You cannot retake it.
+          </p>
         </div>`;
 
       container.innerHTML = feedbackHTML;
