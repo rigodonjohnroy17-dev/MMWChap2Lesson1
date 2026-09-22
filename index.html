@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Archive of Numbers — Math 113 | CITE Technical Institute, Inc.</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root {
+  --blue: #0033a0;
+  --blue-dark: #001f5c;
+  --gold: #f5c518;
+  --gold-light: #ffe066;
+  --bg: #001433;
+  --panel: #0a1f4d;
+  --panel2: #0d2a5c;
+  --text: #e8f0ff;
+  --muted: #8ba3c7;
+  --success: #00e676;
+  --danger: #ff5252;
+  --warn: #ffab00;
+  --radius: 14px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 15% 10%, rgba(0,51,160,0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 90%, rgba(245,197,24,0.08) 0%, transparent 50%);
+}
+#app { max-width: 720px; margin: 0 auto; padding: 12px; min-height: 100vh; display: flex; flex-direction: column; }
+
+.screen { display: none; flex: 1; flex-direction: column; animation: fadeIn 0.35s ease; }
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ===== MASCOT (separate images) ===== */
+.mascot-box {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.mascot-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+}
+.dialogue-bubble {
+  flex: 1;
+  background: var(--panel2);
+  border: 1px solid rgba(245,197,24,0.3);
+  border-radius: 14px;
+  padding: 12px 14px;
+  position: relative;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #c5d4ef;
+}
+.dialogue-bubble::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  bottom: 22px;
+  width: 0; height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid rgba(245,197,24,0.3);
+}
+.dialogue-name {
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+/* Topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid rgba(245,197,24,0.25); border-radius: var(--radius);
+  padding: 10px 12px; margin-bottom: 12px; gap: 8px;
+}
+.topbar .logo-mini { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); }
+.topbar .player { font-weight: 600; color: var(--gold); font-size: 0.95rem; }
+.topbar .stats { display: flex; gap: 12px; font-size: 0.85rem; color: var(--muted); }
+.topbar .stats span { color: var(--text); }
+.progress-wrap { width: 100%; margin-top: 4px; }
+.progress-bar { height: 7px; background: #0d1f40; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold)); transition: width 0.45s ease; }
+
+.card {
+  background: var(--panel); border: 1px solid rgba(245,197,24,0.2); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+}
+.card h2 { color: var(--gold); margin-bottom: 8px; font-size: 1.25rem; line-height: 1.3; }
+.card h3 { color: var(--gold-light); margin: 14px 0 6px; font-size: 1.05rem; }
+.card p, .card li { line-height: 1.55; color: #c5d4ef; margin-bottom: 8px; font-size: 0.95rem; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: linear-gradient(135deg, var(--blue), #0047c2);
+  color: #fff; border: none; border-radius: 10px; padding: 12px 18px;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  min-height: 46px; touch-action: manipulation;
+}
+.btn:hover, .btn:active { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245,197,24,0.3); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary { background: #0d2a5c; border: 1px solid rgba(245,197,24,0.35); color: var(--gold-light); }
+.btn-success { background: linear-gradient(135deg, #00c853, #009624); }
+.btn-danger { background: linear-gradient(135deg, #ff5252, #c62828); }
+.btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.btn-group .btn { flex: 1 1 auto; min-width: 120px; }
+
+.level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .level-grid { grid-template-columns: 1fr; } }
+.level-card {
+  background: var(--panel2); border: 1px solid rgba(245,197,24,0.2); border-radius: var(--radius);
+  padding: 14px; cursor: pointer; transition: all 0.2s; position: relative; min-height: 110px;
+}
+.level-card:hover:not(.locked), .level-card:active:not(.locked) { border-color: var(--gold); box-shadow: 0 0 14px rgba(245,197,24,0.25); }
+.level-card.locked { opacity: 0.45; cursor: not-allowed; }
+.level-card.completed { border-color: var(--success); }
+.level-card .badge-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.level-card h4 { color: var(--text); margin-bottom: 3px; font-size: 0.95rem; }
+.level-card p { font-size: 0.8rem; color: var(--muted); }
+.lock { position: absolute; top: 8px; right: 8px; font-size: 1rem; }
+
+.machine {
+  background: #001a3d; border: 2px solid rgba(245,197,24,0.3); border-radius: 12px;
+  padding: 16px; margin: 12px 0; text-align: center;
+}
+.machine-title { color: var(--gold); font-weight: 600; margin-bottom: 10px; letter-spacing: 0.5px; font-size: 0.9rem; }
+.slots { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.slot {
+  background: #0a2248; border: 2px dashed rgba(245,197,24,0.4); border-radius: 8px;
+  min-width: 60px; min-height: 46px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700; color: var(--gold);
+}
+.arrow { font-size: 1.3rem; color: var(--muted); }
+.input-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+input[type="text"], input[type="number"], select {
+  background: #001a3d; border: 1px solid rgba(245,197,24,0.35); color: var(--text);
+  padding: 11px 12px; border-radius: 8px; font-size: 1rem; min-width: 90px; min-height: 46px;
+}
+input:focus, select:focus { outline: none; border-color: var(--gold); }
+
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+@media (max-width: 380px) { .choice-grid { grid-template-columns: 1fr; } }
+.choice-btn {
+  background: var(--panel2); border: 2px solid rgba(245,197,24,0.25); border-radius: 10px;
+  padding: 14px 10px; cursor: pointer; text-align: center; transition: all 0.15s; font-weight: 600;
+  font-size: 0.9rem; min-height: 52px; display: flex; align-items: center; justify-content: center;
+}
+.choice-btn:active { transform: scale(0.97); }
+.choice-btn.correct { border-color: var(--success); background: rgba(0,230,118,0.15); }
+.choice-btn.wrong { border-color: var(--danger); background: rgba(255,82,82,0.12); }
+
+.feedback { padding: 12px 14px; border-radius: 8px; margin: 10px 0; display: none; font-size: 0.92rem; }
+.feedback.show { display: block; }
+.feedback.correct { background: rgba(0,230,118,0.15); border: 1px solid var(--success); color: #a7f3d0; }
+.feedback.wrong { background: rgba(255,82,82,0.12); border: 1px solid var(--danger); color: #fecaca; }
+.feedback.hint { background: rgba(255,171,0,0.12); border: 1px solid var(--warn); color: #fde68a; }
+
+.set-box { display: inline-flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #001a3d; border: 1px solid rgba(245,197,24,0.3); border-radius: 8px; margin: 4px; }
+.element { background: #0a2a5c; border: 1px solid rgba(245,197,24,0.35); border-radius: 6px; padding: 6px 12px; cursor: pointer; user-select: none; font-size: 0.95rem; }
+.element.selected { background: var(--gold); color: #001433; border-color: var(--gold); }
+
+.math-lg { font-size: 1.3rem; margin: 10px 0; text-align: center; }
+.math-md { font-size: 1.1rem; }
+
+.start-hero { text-align: center; padding: 24px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.start-hero .logo-main { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(245,197,24,0.35); margin-bottom: 14px; object-fit: cover; background: #fff; }
+.start-hero h1 { font-size: 1.7rem; color: var(--gold); margin-bottom: 4px; line-height: 1.25; }
+.start-hero .school { font-size: 0.9rem; color: var(--muted); margin-bottom: 4px; }
+.start-hero .subtitle { color: var(--muted); margin-bottom: 20px; font-size: 0.95rem; }
+.name-input { margin: 12px 0; }
+.name-input input { width: 100%; max-width: 260px; text-align: center; font-size: 1.05rem; padding: 12px; }
+
+.badge-popup {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.85);
+  background: var(--panel); border: 2px solid var(--gold); border-radius: 16px;
+  padding: 24px 28px; text-align: center; z-index: 100; opacity: 0;
+  pointer-events: none; transition: all 0.3s; box-shadow: 0 0 40px rgba(245,197,24,0.3); max-width: 90vw;
+}
+.badge-popup.show { opacity: 1; transform: translate(-50%,-50%) scale(1); pointer-events: auto; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,20,0.7); z-index: 99; display: none; }
+.overlay.show { display: block; }
+
+.report-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9rem; }
+.report-table td, .report-table th { padding: 8px 10px; border-bottom: 1px solid rgba(245,197,24,0.15); text-align: left; }
+.report-table th { color: var(--gold); }
+.score-box { background: var(--panel2); border: 1px solid rgba(245,197,24,0.3); border-radius: 10px; padding: 14px; margin: 12px 0; text-align: center; }
+.score-box .big { font-size: 2rem; color: var(--gold); font-weight: 700; }
+.cite-footer { text-align: center; padding: 10px; font-size: 0.75rem; color: var(--muted); margin-top: auto; line-height: 1.4; }
+
+@media (max-width: 480px) {
+  .mascot-img { width: 90px; height: 90px; }
+  .mascot-box { gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START -->
+  <div id="screen-start" class="screen active">
+    <div class="start-hero">
+      <img class="logo-main" src="https://media.licdn.com/dms/image/v2/C510BAQEUckCYDETi_g/company-logo_200_200/company-logo_200_200/0/1631406047544/cite_technical_institute_inc_logo?e=2147483647&v=beta&t=U47h-NqVtn2PCX4nw7m-1HZAO6MomwrVKNQIBN9QRe8" alt="CITE Logo">
+      <div class="school">CITE Technical Institute, Inc.</div>
+      <h1>THE ARCHIVE OF NUMBERS</h1>
+      <p class="subtitle">Math 113 · Mathematics in the Modern World<br>Chapter 2 · Lesson 1: The Language of Mathematics</p>
+      <div class="card" style="width:100%;max-width:400px;">
+        <div class="mascot-box" style="justify-content:center;margin-bottom:16px;">
+          <img src="mascot-greeting.png" class="mascot-img" alt="MathBot">
+        </div>
+        <p style="text-align:center;">You are a Mathematical Explorer. The Archive has gone silent. Only those who understand the <strong>language of mathematics</strong> can restore the Master Code.</p>
+        <div class="name-input">
+          <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:0.9rem;">Enter your explorer name</label>
+          <input type="text" id="player-name" placeholder="Your name" maxlength="24">
+        </div>
+        <div class="btn-group" style="justify-content:center;">
+          <button class="btn" id="btn-start">ENTER THE ARCHIVE</button>
+          <button class="btn btn-secondary" id="btn-continue" style="display:none;">CONTINUE</button>
+        </div>
+        <p style="margin-top:12px;font-size:0.8rem;color:var(--muted);text-align:center;">Progress saves automatically on this device.</p>
+      </div>
+    </div>
+    <div class="cite-footer">CITE Technical Institute, Inc. · Math 113<br>Developed by John Roy Rigodon</div>
+  </div>
+
+  <!-- HUB -->
+  <div id="screen-hub" class="screen">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img class="logo-mini" src="https://media.licdn.com/dms/image/v2/C510BAQEUckCYDETi_g/company-logo_200_200/company-logo_200_200/0/1631406047544/cite_technical_institute_inc_logo?e=2147483647&v=beta&t=U47h-NqVtn2PCX4nw7m-1HZAO6MomwrVKNQIBN9QRe8" alt="CITE">
+        <div class="player"><span id="hub-name">—</span></div>
+      </div>
+      <div class="stats">
+        <div>XP: <span id="hub-xp">0</span></div>
+        <div>Rank: <span id="hub-rank">Novice</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:2px;">Chapter Progress</div>
+        <div class="progress-bar"><div class="progress-fill" id="hub-progress" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="hub-mascot-area"></div>
+      <h2>Archive Map</h2>
+      <div class="level-grid" id="level-grid"></div>
+      <div class="btn-group" style="margin-top:16px;">
+        <button class="btn btn-secondary" id="btn-badges">Badges</button>
+        <button class="btn btn-secondary" id="btn-report">Report</button>
+        <button class="btn btn-danger" id="btn-reset">Reset</button>
+      </div>
+    </div>
+    <div class="cite-footer">CITE Technical Institute, Inc. · Math 113<br>Developed by John Roy Rigodon</div>
+  </div>
+
+  <!-- LEVEL -->
+  <div id="screen-level" class="screen">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img class="logo-mini" src="https://media.licdn.com/dms/image/v2/C510BAQEUckCYDETi_g/company-logo_200_200/company-logo_200_200/0/1631406047544/cite_technical_institute_inc_logo?e=2147483647&v=beta&t=U47h-NqVtn2PCX4nw7m-1HZAO6MomwrVKNQIBN9QRe8" alt="CITE">
+        <div class="player"><span id="lvl-name">—</span></div>
+      </div>
+      <div class="stats">
+        <div>XP: <span id="lvl-xp">0</span></div>
+        <div id="lvl-sector">—</div>
+      </div>
+      <button class="btn btn-secondary" id="btn-back-hub" style="padding:8px 12px;font-size:0.85rem;min-height:40px;">← Map</button>
+    </div>
+    <div id="level-content"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div id="screen-badges" class="screen">
+    <div class="topbar">
+      <div class="player">Badges</div>
+      <button class="btn btn-secondary" id="btn-back-from-badges">← Back</button>
+    </div>
+    <div class="card">
+      <h2>Achievement Badges</h2>
+      <div class="level-grid" id="badge-list"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="screen-report" class="screen">
+    <div class="topbar">
+      <div class="player">Mission Report</div>
+      <button class="btn btn-secondary" id="btn-back-from-report">← Back</button>
+    </div>
+    <div class="card" id="report-content"></div>
+  </div>
+
+  <!-- FINAL -->
+  <div id="screen-final" class="screen">
+    <div class="start-hero">
+      <img class="logo-main" src="https://media.licdn.com/dms/image/v2/C510BAQEUckCYDETi_g/company-logo_200_200/company-logo_200_200/0/1631406047544/cite_technical_institute_inc_logo?e=2147483647&v=beta&t=U47h-NqVtn2PCX4nw7m-1HZAO6MomwrVKNQIBN9QRe8" alt="CITE Logo" style="width:90px;height:90px;">
+      <div class="mascot-box" style="justify-content:center;margin:12px 0;">
+        <img src="mascot-celebrating.png" class="mascot-img" alt="MathBot">
+      </div>
+      <h1 style="color:var(--success);">MASTER CODE ACCEPTED</h1>
+      <p class="subtitle">You have learned to read, interpret, construct, and communicate using the language of mathematics.</p>
+      <div class="card" style="width:100%;max-width:400px;" id="final-summary"></div>
+      <div class="btn-group" style="justify-content:center;margin-top:16px;">
+        <button class="btn" id="btn-final-report">Print Report</button>
+        <button class="btn btn-secondary" id="btn-final-hub">Return to Map</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="badge-popup" id="badge-popup">
+  <div class="mascot-box" style="justify-content:center;margin-bottom:10px;">
+    <img src="mascot-celebrating.png" class="mascot-img" style="width:90px;height:90px;" alt="MathBot">
+  </div>
+  <h3 id="badge-title" style="color:var(--gold);">Badge Unlocked!</h3>
+  <p id="badge-desc" style="color:var(--muted);margin-top:6px;font-size:0.9rem;"></p>
+  <button class="btn" style="margin-top:14px;" onclick="closeBadge()">Continue</button>
+</div>
+
+<script>
+/* ============================================================
+   MASCOT HELPER (5 separate images)
+   ============================================================ */
+function makeMascotHTML(pose, text) {
+  // pose: greeting | explaining | pointing | thinking | celebrating
+  const src = `mascot-${pose}.png`;
+  return `
+    <div class="mascot-box">
+      <img src="${src}" class="mascot-img" alt="MathBot">
+      <div class="dialogue-bubble">
+        <div class="dialogue-name">MathBot</div>
+        ${text}
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+const STORAGE_KEY = 'mmw_cite_archive_v5';
+let state = {
+  name: '',
+  xp: 0,
+  completed: {},
+  progress: {},
+  badges: {},
+  actCorrect: 0,
+  actTotal: 0,
+  assessCorrect: 0,
+  assessTotal: 0,
+  assessDone: false,
+  started: false
+};
+
+const LEVELS = [
+  { id:'L1', title:'Language & Communication', icon:'💬', badge:'Symbol Decoder', badgeIcon:'🔣' },
+  { id:'L2', title:'Before Digital', icon:'🏺', badge:'Ancient Mathematician', badgeIcon:'🏺' },
+  { id:'L3', title:'Math as a Language', icon:'📐', badge:'Precision Master', badgeIcon:'📐' },
+  { id:'L4', title:'Expressions vs Sentences', icon:'📝', badge:'Sentence Analyst', badgeIcon:'📝' },
+  { id:'L5', title:'Conventions', icon:'⚙️', badge:'Notation Specialist', badgeIcon:'⚙️' },
+  { id:'L6', title:'Sets', icon:'🌱', badge:'Set Organizer', badgeIcon:'🌱' },
+  { id:'L7', title:'Relations', icon:'🔗', badge:'Relation Builder', badgeIcon:'🔗' },
+  { id:'L8', title:'Functions', icon:'🏭', badge:'Function Engineer', badgeIcon:'🏭' },
+  { id:'L9', title:'Binary Operations', icon:'➕', badge:'Operation Specialist', badgeIcon:'➕' },
+  { id:'L10', title:'Properties', icon:'⚖️', badge:'Property Guardian', badgeIcon:'⚖️' },
+  { id:'ASSESS', title:'Chapter Assessment', icon:'📋', badge:'Assessment Completer', badgeIcon:'📋' },
+  { id:'FINAL', title:'Master Code', icon:'🔑', badge:'Master of Mathematical Language', badgeIcon:'🏆' }
+];
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function load(){ try{ const r=localStorage.getItem(STORAGE_KEY); if(r){ state={...state,...JSON.parse(r)}; return true; } }catch(e){} return false; }
+function resetProgress(){ if(confirm('Reset all progress?')){ localStorage.removeItem(STORAGE_KEY); state={name:'',xp:0,completed:{},progress:{},badges:{},actCorrect:0,actTotal:0,assessCorrect:0,assessTotal:0,assessDone:false,started:false}; showScreen('start'); document.getElementById('btn-continue').style.display='none'; } }
+
+function recordActivity(correct){
+  state.actTotal++;
+  if(correct) state.actCorrect++;
+  save();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if(id==='hub') renderHub();
+  if(id==='badges') renderBadges();
+  if(id==='report') renderReport();
+}
+function addXP(n){ state.xp+=n; save(); updateTopbars(); }
+function updateTopbars(){
+  const name=state.name||'Explorer';
+  ['hub-name','lvl-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=name; });
+  ['hub-xp','lvl-xp'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=state.xp; });
+  const pct=Math.round((Object.keys(state.completed).length/LEVELS.length)*100);
+  const fill=document.getElementById('hub-progress'); if(fill) fill.style.width=pct+'%';
+  const rankEl=document.getElementById('hub-rank'); if(rankEl) rankEl.textContent=getRank();
+}
+function getRank(){ const c=Object.keys(state.completed).length; if(c>=12) return 'Master of Math Language'; if(c>=9) return 'Senior Explorer'; if(c>=5) return 'Mathematical Explorer'; if(c>=2) return 'Apprentice'; return 'Novice'; }
+function awardBadge(id){
+  if(state.badges[id]) return;
+  const lvl=LEVELS.find(l=>l.id===id); if(!lvl) return;
+  state.badges[id]=true; save();
+  document.getElementById('badge-title').textContent=lvl.badge;
+  document.getElementById('badge-desc').textContent='Completed: '+lvl.title;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('badge-popup').classList.add('show');
+}
+function closeBadge(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('badge-popup').classList.remove('show'); }
+function completeLevel(id){ state.completed[id]=true; addXP(80); awardBadge(id); save(); }
+
+function getActivityScore(){ if(state.actTotal===0) return 0; return Math.round((state.actCorrect / state.actTotal) * 50); }
+function getAssessScore(){ if(state.assessTotal===0) return 0; return Math.round((state.assessCorrect / state.assessTotal) * 50); }
+function getOverallScore(){ return getActivityScore() + getAssessScore(); }
+
+function renderHub(){
+  updateTopbars();
+  document.getElementById('hub-mascot-area').innerHTML = makeMascotHTML('greeting', `Welcome back, ${state.name || 'Explorer'}! Choose a sector to continue restoring the Archive.`);
+  const grid=document.getElementById('level-grid'); grid.innerHTML='';
+  LEVELS.forEach((lvl,idx)=>{
+    const unlocked=idx===0||state.completed[LEVELS[idx-1].id];
+    const done=state.completed[lvl.id];
+    const card=document.createElement('div');
+    card.className='level-card'+(unlocked?'':' locked')+(done?' completed':'');
+    card.innerHTML=`<div class="badge-icon">${lvl.icon}</div><h4>${lvl.title}</h4><p>${done?'✓ Completed':(unlocked?'Ready':'Locked')}</p>${!unlocked?'<span class="lock">🔒</span>':''}`;
+    if(unlocked) card.onclick=()=>startLevel(lvl.id);
+    grid.appendChild(card);
+  });
+}
+function renderBadges(){
+  const list=document.getElementById('badge-list'); list.innerHTML='';
+  LEVELS.forEach(lvl=>{
+    const earned=state.badges[lvl.id];
+    const card=document.createElement('div');
+    card.className='level-card'+(earned?' completed':' locked');
+    card.innerHTML=`<div class="badge-icon">${lvl.badgeIcon}</div><h4>${lvl.badge}</h4><p>${earned?'Earned':'Not yet'}</p>`;
+    list.appendChild(card);
+  });
+}
+function renderReport(){
+  const el=document.getElementById('report-content');
+  const actScore = getActivityScore();
+  const assScore = getAssessScore();
+  const overall = getOverallScore();
+  const actPct = state.actTotal ? Math.round((state.actCorrect/state.actTotal)*100) : 0;
+  const assPct = state.assessTotal ? Math.round((state.assessCorrect/state.assessTotal)*100) : 0;
+  const pct=Math.round((Object.keys(state.completed).length/LEVELS.length)*100);
+
+  el.innerHTML=`
+    <h2>Explorer Report — Math 113</h2>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px;">CITE Technical Institute, Inc.<br>Developed by John Roy Rigodon</p>
+    <div class="score-box">
+      <div style="font-size:0.9rem;color:var(--muted);">OVERALL SCORE</div>
+      <div class="big">${overall} / 100</div>
+    </div>
+    <table class="report-table">
+      <tr><th>Student Name</th><td>${state.name||'—'}</td></tr>
+      <tr><th>Course</th><td>Math 113 · Mathematics in the Modern World</td></tr>
+      <tr><th>Chapter</th><td>Chapter 2 · Lesson 1: The Language of Mathematics</td></tr>
+      <tr><th>Total XP</th><td>${state.xp}</td></tr>
+      <tr><th>Progress</th><td>${pct}%</td></tr>
+      <tr><th>Rank</th><td>${getRank()}</td></tr>
+    </table>
+    <h3>Score Breakdown (50% Activities + 50% Assessment)</h3>
+    <table class="report-table">
+      <tr><th>Activities Correct</th><td>${state.actCorrect} / ${state.actTotal}</td></tr>
+      <tr><th>Activity Accuracy</th><td>${actPct}%</td></tr>
+      <tr><th>Activities Score (50%)</th><td><strong>${actScore} pts</strong></td></tr>
+      <tr><th>Assessment Correct</th><td>${state.assessCorrect} / ${state.assessTotal || '—'}</td></tr>
+      <tr><th>Assessment Accuracy</th><td>${state.assessTotal ? assPct+'%' : 'Not taken'}</td></tr>
+      <tr><th>Assessment Score (50%)</th><td><strong>${assScore} pts</strong></td></tr>
+      <tr><th>Final Score</th><td style="color:var(--gold);font-weight:700;">${overall} / 100</td></tr>
+    </table>
+    <h3>Sectors Completed</h3>
+    <ul style="padding-left:18px;color:#c5d4ef;">${LEVELS.filter(l=>state.completed[l.id]).map(l=>`<li>${l.title}</li>`).join('')||'<li>None yet</li>'}</ul>
+    <div class="btn-group"><button class="btn" onclick="window.print()">Print Report</button></div>`;
+}
+
+let currentLevel=null, currentStep=0;
+function startLevel(id){ currentLevel=id; currentStep=state.progress[id]||0; showScreen('level'); document.getElementById('lvl-sector').textContent=LEVELS.find(l=>l.id===id).title; updateTopbars(); renderLevelStep(); }
+function setStep(n){ currentStep=n; state.progress[currentLevel]=n; save(); renderLevelStep(); }
+function nextStep(){ setStep(currentStep+1); }
+function renderLevelStep(){
+  const content=document.getElementById('level-content'); content.innerHTML='';
+  const r=LEVEL_RENDERERS[currentLevel]; if(r) r(content,currentStep);
+  if(window.MathJax) MathJax.typesetPromise([content]).catch(()=>{});
+}
+
+/* ============================================================
+   LEVEL CONTENT
+   ============================================================ */
+const LEVEL_RENDERERS = {
+  L1(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`
+        <div class="card">
+          ${makeMascotHTML('greeting', 'Welcome, Mathematical Explorer! This is the Language Sector. Let’s discover what a language really is.')}
+          <h2>💬 Sector 1 — Language, Message & Communication</h2>
+          <p>Language is a <strong>system of symbols, words, signs, and rules</strong> used to communicate information, ideas, or feelings.</p>
+          <p>Traffic lights are a language:</p>
+          <ul style="padding-left:18px;"><li>🔴 Red → Stop</li><li>🟡 Yellow → Caution</li><li>🟢 Green → Go</li></ul>
+          <p>People must <em>agree</em> on what the symbols mean.</p>
+          <div class="btn-group"><button class="btn" onclick="nextStep()">Continue</button></div>
+        </div>`; },
+      ()=>{ container.innerHTML=`
+        <div class="card">
+          ${makeMascotHTML('explaining', 'A message is the information someone wants to share. Communication needs a sender, a message, a medium, and a receiver.')}
+          <h2>Message & Communication</h2>
+          <p class="math-lg">Sender → Message → Medium → Receiver</p>
+          <p>A teacher writes an equation on the board. Teacher = sender, equation = message, board = medium, students = receivers.</p>
+          <div class="btn-group"><button class="btn" onclick="nextStep()">Continue</button></div>
+        </div>`; },
+      ()=>{ container.innerHTML=`
+        <div class="card">
+          ${makeMascotHTML('pointing', 'Look at these symbols. What do you think they are trying to communicate?')}
+          <h2>Discovery: What do these symbols mean?</h2>
+          <div id="sym-q"></div><div class="feedback" id="sym-fb"></div>
+          <div class="btn-group"><button class="btn" id="sym-next" style="display:none;" onclick="nextStep()">Continue</button></div>
+        </div>`;
+        const items=[{sym:'➕',ans:'Addition',opts:['Addition','Stop','Greater than','Empty set']},{sym:'🔴',ans:'Stop / danger',opts:['Go','Stop / danger','Caution','Equality']},{sym:'=',ans:'Equality',opts:['Addition','Equality','Less than','Multiplication']},{sym:'⭐',ans:'Depends on context',opts:['Always favorite','Depends on context','Always star','Always good']}];
+        let qi=0;
+        function showQ(){ if(qi>=items.length){ document.getElementById('sym-q').innerHTML=makeMascotHTML('celebrating','Excellent! You decoded all the symbols.')+'<p style="color:var(--success);">✓ All symbols decoded!</p>'; document.getElementById('sym-next').style.display='inline-flex'; addXP(30); return; }
+          const it=items[qi];
+          document.getElementById('sym-q').innerHTML=`<div class="machine"><div class="machine-title">Symbol</div><div style="font-size:2.4rem;">${it.sym}</div></div><div class="choice-grid">${it.opts.map(o=>`<div class="choice-btn" data-a="${o}">${o}</div>`).join('')}</div>`;
+          document.querySelectorAll('.choice-btn').forEach(btn=>{ btn.onclick=()=>{ const fb=document.getElementById('sym-fb'); if(btn.dataset.a===it.ans){ btn.classList.add('correct'); fb.className='feedback correct show'; fb.textContent='✓ Correct! Shared conventions give symbols meaning.'; recordActivity(true); setTimeout(()=>{qi++;showQ();fb.className='feedback';},850); } else { btn.classList.add('wrong'); fb.className='feedback wrong show'; fb.textContent='Not quite. Think about the common agreed meaning.'; recordActivity(false); } }; });
+        } showQ(); },
+      ()=>{ container.innerHTML=`
+        <div class="card">
+          ${makeMascotHTML('celebrating', 'Great work! You’ve unlocked the idea that language needs conventions.')}
+          <h2>Key Idea</h2>
+          <p>Language needs <strong>conventions</strong>. A symbol does not automatically have meaning — people must agree on what it stands for.</p>
+          <div class="btn-group"><button class="btn btn-success" onclick="finishL1()">Complete Sector 1</button></div>
+        </div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L2(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Welcome to the history sector! Long before calculators, humans still needed mathematics.')}<h2>🏺 Sector 2 — Mathematics Before Digital</h2><p>How do you record quantity without modern numerals?</p><div class="btn-group"><button class="btn" onclick="nextStep()">Counting Wall</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Look at these tally marks. How many do you count?')}<h2>Counting Wall</h2><div class="machine"><div style="font-size:1.8rem;letter-spacing:3px;">|||||</div></div><div class="input-row"><input type="number" id="tally-ans" min="0" max="20" placeholder="?"><button class="btn" onclick="checkTally()">Check</button></div><div class="feedback" id="tally-fb"></div><div class="btn-group"><button class="btn" id="tally-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        window.checkTally=()=>{ const v=parseInt(document.getElementById('tally-ans').value); const fb=document.getElementById('tally-fb'); if(v===5){ fb.className='feedback correct show'; fb.textContent='✓ Five marks → five objects.'; recordActivity(true); addXP(20); document.getElementById('tally-next').style.display='inline-flex'; } else { fb.className='feedback wrong show'; fb.textContent='Count the vertical lines carefully.'; recordActivity(false); } }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','These Roman numerals are a different system. Can you decode them?')}<h2>Roman Numeral Door</h2><div id="roman-q"></div><div class="feedback" id="roman-fb"></div><div class="btn-group"><button class="btn" id="roman-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const qs=[{n:'VIII',a:8},{n:'XII',a:12},{n:'XX',a:20},{n:'IV',a:4}]; let i=0;
+        function show(){ if(i>=qs.length){ document.getElementById('roman-q').innerHTML=makeMascotHTML('celebrating','Door unlocked! Symbols gain meaning from the system that defines them.')+'<p style="color:var(--success);">✓ Door unlocked!</p>'; document.getElementById('roman-next').style.display='inline-flex'; addXP(30); return; }
+          document.getElementById('roman-q').innerHTML=`<div class="machine"><div class="machine-title">Roman Numeral</div><div style="font-size:2rem;">${qs[i].n}</div></div><div class="input-row"><input type="number" id="rom-val" placeholder="Value"><button class="btn" id="rom-check">Check</button></div>`;
+          document.getElementById('rom-check').onclick=()=>{ const v=parseInt(document.getElementById('rom-val').value); const fb=document.getElementById('roman-fb'); if(v===qs[i].a){ fb.className='feedback correct show'; fb.textContent='✓ Correct!'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},750); } else { fb.className='feedback wrong show'; fb.textContent='Hint: I=1, V=5, X=10.'; recordActivity(false); } };
+        } show(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','You’ve seen why humans needed mathematical symbols long before computers.')}<h2>Why symbols matter</h2><div class="btn-group"><button class="btn btn-success" onclick="finishL2()">Complete Sector 2</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L3(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Mathematics is a language! Let’s see why.')}<h2>📐 Sector 3 — Mathematics as a Language</h2><p class="math-lg">\\(5 + 3 = 8\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Precision</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','Ordinary language can be vague. Mathematics aims to be precise.')}<h2>Precision</h2><p>“The box is big.” vs</p><p class="math-lg">\\(L=50\\text{ cm},\\; W=30\\text{ cm},\\; H=20\\text{ cm}\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Conciseness & Power</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','One short equation can replace a long sentence and apply to many situations.')}<h2>Conciseness & Power</h2><p class="math-lg">\\(C = pn\\) &nbsp;&nbsp; \\(A = \\pi r^{2}\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Word → Math</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Translate these English phrases into mathematical notation.')}<h2>Word → Mathematics</h2><div id="w2m-q"></div><div class="feedback" id="w2m-fb"></div><div class="btn-group"><button class="btn" id="w2m-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const qs=[{q:'Five more than twice a number x',a:['2x+5','2x + 5','5+2x']},{q:'The product of 3 and y',a:['3y','3*y']},{q:'A number n decreased by 7',a:['n-7','n - 7']}];
+        let i=0;
+        function show(){ if(i>=qs.length){ document.getElementById('w2m-q').innerHTML=makeMascotHTML('celebrating','Perfect translations!')+'<p style="color:var(--success);">✓ Excellent!</p>'; document.getElementById('w2m-next').style.display='inline-flex'; addXP(40); return; }
+          document.getElementById('w2m-q').innerHTML=`<p><strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="w2m-ans" placeholder="e.g. 2x+5"><button class="btn" id="w2m-check">Check</button></div>`;
+          document.getElementById('w2m-check').onclick=()=>{ let v=document.getElementById('w2m-ans').value.replace(/\s+/g,'').toLowerCase(); const ok=qs[i].a.some(a=>a.replace(/\s+/g,'').toLowerCase()===v); const fb=document.getElementById('w2m-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Correct!'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},750); } else { fb.className='feedback wrong show'; fb.textContent='Hint: use conventional notation.'; recordActivity(false); } };
+        } show(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Mathematics is precise, concise, and powerful!')}<h2>Summary</h2><div class="btn-group"><button class="btn btn-success" onclick="finishL3()">Complete Sector 3</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L4(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Time to tell expressions from sentences!')}<h2>📝 Sector 4 — Expressions vs Sentences</h2><p>An <strong>expression</strong> represents a quantity. A <strong>sentence</strong> makes a true/false claim.</p><div class="btn-group"><button class="btn" onclick="nextStep()">Classification</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Does this make a claim that can be true or false?')}<h2>EXPRESSION or SENTENCE?</h2><div id="es-q"></div><div class="feedback" id="es-fb"></div><div class="btn-group"><button class="btn" id="es-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const items=[{t:'5 + 3',a:'E'},{t:'5 + 3 = 8',a:'S'},{t:'2x + 7',a:'E'},{t:'2x + 7 = 15',a:'S'},{t:'x^{2} + 1',a:'E'},{t:'x > 10',a:'S'},{t:'\\sqrt{16}',a:'E'},{t:'3(4+5)=27',a:'S'}];
+        let i=0,score=0;
+        function show(){ if(i>=items.length){ document.getElementById('es-q').innerHTML=makeMascotHTML('celebrating',`You got ${score}/${items.length} correct!`)+`<p style="color:var(--success);">✓ Done.</p>`; document.getElementById('es-next').style.display='inline-flex'; addXP(40); return; }
+          document.getElementById('es-q').innerHTML=`<div class="machine"><div class="math-lg">\\(${items[i].t}\\)</div></div><div class="choice-grid"><div class="choice-btn" data-a="E">Expression</div><div class="choice-btn" data-a="S">Sentence</div></div>`;
+          if(window.MathJax) MathJax.typesetPromise();
+          document.querySelectorAll('.choice-btn').forEach(btn=>{ btn.onclick=()=>{ const fb=document.getElementById('es-fb'); if(btn.dataset.a===items[i].a){ btn.classList.add('correct'); score++; fb.className='feedback correct show'; fb.textContent=items[i].a==='E'?'✓ Expression':'✓ Sentence'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},900); } else { btn.classList.add('wrong'); fb.className='feedback wrong show'; fb.textContent='Hint: Does it make a true/false claim?'; recordActivity(false); } }; });
+        } show(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','You can now tell expressions from sentences!')}<h2>Remember</h2><p>True/false claim → sentence. Quantity only → expression.</p><div class="btn-group"><button class="btn btn-success" onclick="finishL4()">Complete Sector 4</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L5(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Conventions keep mathematical communication consistent.')}<h2>⚙️ Sector 5 — Conventions</h2><p class="math-lg">\\(3 + 4 \\times 5 = 23\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Repair Notation</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Convert these to the conventional form we usually write.')}<h2>Conventional form</h2><div id="conv-q"></div><div class="feedback" id="conv-fb"></div><div class="btn-group"><button class="btn" id="conv-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const qs=[{q:'3 × x',a:['3x']},{q:'a × b',a:['ab']},{q:'x × x × x',a:['x^3','x³']},{q:'x + x + x + x',a:['4x']},{q:'2 × (x + 3)',a:['2(x+3)','2(x + 3)']}];
+        let i=0;
+        function show(){ if(i>=qs.length){ document.getElementById('conv-q').innerHTML=makeMascotHTML('celebrating','Notation repaired!')+'<p style="color:var(--success);">✓ Done.</p>'; document.getElementById('conv-next').style.display='inline-flex'; addXP(40); return; }
+          document.getElementById('conv-q').innerHTML=`<p>Convert: <strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="conv-ans" placeholder="conventional"><button class="btn" id="conv-check">Check</button></div>`;
+          document.getElementById('conv-check').onclick=()=>{ let v=document.getElementById('conv-ans').value.replace(/\s+/g,'').toLowerCase().replace('×','*').replace('³','^3'); const ok=qs[i].a.some(a=>a.replace(/\s+/g,'').toLowerCase().replace('³','^3')===v); const fb=document.getElementById('conv-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Accepted.'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},700); } else { fb.className='feedback wrong show'; fb.textContent='Hint: drop × with variables.'; recordActivity(false); } };
+        } show(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','What is the value of this expression?')}<h2>Order of Operations</h2><p>Evaluate: \\(2 + 3 \\times 4^{2}\\)</p><div class="input-row"><input type="number" id="oo-ans"><button class="btn" onclick="checkOO()">Check</button></div><div class="feedback" id="oo-fb"></div><div class="btn-group"><button class="btn" id="oo-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        window.checkOO=()=>{ const v=parseInt(document.getElementById('oo-ans').value); const fb=document.getElementById('oo-fb'); if(v===50){ fb.className='feedback correct show'; fb.textContent='✓ Correct (50).'; recordActivity(true); addXP(25); document.getElementById('oo-next').style.display='inline-flex'; } else { fb.className='feedback wrong show'; fb.textContent='Order: Grouping → Exponents → ×÷ → +−'; recordActivity(false); } }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','You now respect mathematical conventions!')}<div class="btn-group"><button class="btn btn-success" onclick="finishL5()">Complete Sector 5</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L6(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Let’s organize objects into sets!')}<h2>🌱 Sector 6 — Sets</h2><p class="math-lg">\\(A = \\{1,2,3,4,5\\}\\)</p><p>\\(3 \\in A\\) &nbsp;&nbsp; \\(8 \\notin A\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Roster & Set-Builder</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','Roster method lists every element inside braces.')}<h2>Roster Method</h2><p class="math-md">\\(\\{2,4,6,8,10\\}\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Set-Builder</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Can you turn this set-builder description into roster form?')}<h2>Set-Builder → Roster</h2><p>\\(A = \\{x \\mid x\\text{ is a positive integer and }x < 6\\}\\)</p><div class="input-row"><input type="text" id="sb-ans" placeholder="{1,2,3,...}"><button class="btn" onclick="checkSB()">Check</button></div><div class="feedback" id="sb-fb"></div><div class="btn-group"><button class="btn" id="sb-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        window.checkSB=()=>{ let v=document.getElementById('sb-ans').value.replace(/\s+/g,''); const ok=v==='{1,2,3,4,5}'||v==='{5,4,3,2,1}'; const fb=document.getElementById('sb-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Correct.'; recordActivity(true); addXP(25); document.getElementById('sb-next').style.display='inline-flex'; } else { fb.className='feedback wrong show'; fb.textContent='List 1 to 5.'; recordActivity(false); } }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Is 6 an element of this set?')}<h2>Membership</h2><p>Let \\(B=\\{2,4,6,8,10\\}\\). Is \\(6 \\in B\\)?</p><div class="choice-grid"><div class="choice-btn" id="mem-yes">Yes</div><div class="choice-btn" id="mem-no">No</div></div><div class="feedback" id="mem-fb"></div><div class="btn-group"><button class="btn" id="mem-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        document.getElementById('mem-yes').onclick=()=>{ document.getElementById('mem-fb').className='feedback correct show'; document.getElementById('mem-fb').textContent='✓ Yes.'; recordActivity(true); document.getElementById('mem-next').style.display='inline-flex'; addXP(15); };
+        document.getElementById('mem-no').onclick=()=>{ document.getElementById('mem-fb').className='feedback wrong show'; document.getElementById('mem-fb').textContent='6 is in the set.'; recordActivity(false); }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Sets are now under your control!')}<div class="btn-group"><button class="btn btn-success" onclick="finishL6()">Complete Sector 6</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L7(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Relations connect elements of sets.')}<h2>🔗 Sector 7 — Relations</h2><p class="math-md">\\(A\\times B=\\{(1,3),(1,4),(2,3),(2,4)\\}\\)</p><div class="btn-group"><button class="btn" onclick="nextStep()">Connection Chamber</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Build the relation “multiply by 2” by connecting the correct pairs.')}<h2>Connection Chamber</h2><p>X={1,2,3} &nbsp; Y={2,4,6}</p><div style="display:flex;justify-content:space-around;flex-wrap:wrap;margin:12px 0;"><div><strong>X</strong><div class="set-box" id="set-x"></div></div><div><strong>Y</strong><div class="set-box" id="set-y"></div></div></div><p>Pairs: <span id="pairs-list">(none)</span></p><div class="btn-group"><button class="btn" onclick="addPair()">Add pair</button><button class="btn btn-secondary" onclick="clearPairs()">Clear</button><button class="btn btn-success" onclick="checkRelation()">Check</button></div><div class="feedback" id="rel-fb"></div><div class="btn-group"><button class="btn" id="rel-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const X=[1,2,3], Y=[2,4,6]; let selX=null, selY=null, pairs=[];
+        function renderSets(){ document.getElementById('set-x').innerHTML=X.map(n=>`<span class="element${selX===n?' selected':''}" data-n="${n}">${n}</span>`).join(''); document.getElementById('set-y').innerHTML=Y.map(n=>`<span class="element${selY===n?' selected':''}" data-n="${n}">${n}</span>`).join(''); document.querySelectorAll('#set-x .element').forEach(el=>el.onclick=()=>{selX=+el.dataset.n;renderSets();}); document.querySelectorAll('#set-y .element').forEach(el=>el.onclick=()=>{selY=+el.dataset.n;renderSets();}); document.getElementById('pairs-list').textContent=pairs.length?pairs.map(p=>`(${p[0]},${p[1]})`).join(', '):'(none)'; }
+        window.addPair=()=>{ if(selX!==null&&selY!==null){ pairs.push([selX,selY]); selX=selY=null; renderSets(); } };
+        window.clearPairs=()=>{ pairs=[]; renderSets(); };
+        window.checkRelation=()=>{ const target=[[1,2],[2,4],[3,6]]; const ok=target.every(t=>pairs.some(p=>p[0]===t[0]&&p[1]===t[1]))&&pairs.length===3; const fb=document.getElementById('rel-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Correct relation.'; recordActivity(true); addXP(40); document.getElementById('rel-next').style.display='inline-flex'; } else { fb.className='feedback wrong show'; fb.textContent='Need (1,2), (2,4), (3,6).'; recordActivity(false); } };
+        renderSets(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','You can now build relations!')}<div class="btn-group"><button class="btn btn-success" onclick="finishL7()">Complete Sector 7</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L8(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','A function is a special relation: every input has exactly one output.')}<h2>🏭 Sector 8 — Functions</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Function Factory</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Try different inputs and watch the single output appear.')}<h2>Function Factory</h2><p>Rule: \\(f(x)=2x+1\\)</p><div class="machine"><div class="slots"><div class="slot" id="ff-in">?</div><span class="arrow">→</span><div class="slot" style="min-width:90px;">2x+1</div><span class="arrow">→</span><div class="slot" id="ff-out">?</div></div><div class="input-row"><input type="number" id="ff-val" placeholder="input"><button class="btn" onclick="runFF()">Run</button></div></div><div class="btn-group"><button class="btn" onclick="nextStep()">Domain & Range</button></div></div>`;
+        window.runFF=()=>{ const x=parseFloat(document.getElementById('ff-val').value); if(isNaN(x)) return; document.getElementById('ff-in').textContent=x; document.getElementById('ff-out').textContent=2*x+1; }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','Domain = possible inputs. Codomain = expected outputs. Range = actual outputs.')}<h2>Domain, Codomain, Range</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Is it a function?</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Which of these relations are functions?')}<h2>Broken Machine Test</h2><div id="fn-q"></div><div class="feedback" id="fn-fb"></div><div class="btn-group"><button class="btn" id="fn-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        const items=[{t:'\\{(1,3),(2,5),(3,7)\\}',a:true,why:'Each input once → function.'},{t:'\\{(1,2),(1,5),(2,4)\\}',a:false,why:'Input 1 has two outputs → not a function.'},{t:'\\{(1,5),(2,5),(3,7)\\}',a:true,why:'Different inputs may share output. Still a function.'},{t:'\\{(4,1),(5,2),(4,3)\\}',a:false,why:'Input 4 maps to two values → not a function.'}];
+        let i=0,score=0;
+        function show(){ if(i>=items.length){ document.getElementById('fn-q').innerHTML=makeMascotHTML('celebrating',`You got ${score}/${items.length} correct!`)+`<p style="color:var(--success);">✓ Done.</p>`; document.getElementById('fn-next').style.display='inline-flex'; addXP(50); return; }
+          document.getElementById('fn-q').innerHTML=`<div class="machine"><div class="math-md">\\(${items[i].t}\\)</div></div><div class="choice-grid"><div class="choice-btn" data-a="1">Function</div><div class="choice-btn" data-a="0">Not a function</div></div>`;
+          if(window.MathJax) MathJax.typesetPromise();
+          document.querySelectorAll('.choice-btn').forEach(btn=>{ btn.onclick=()=>{ const yes=btn.dataset.a==='1'; const fb=document.getElementById('fn-fb'); if(yes===items[i].a){ btn.classList.add('correct'); score++; fb.className='feedback correct show'; fb.textContent='✓ '+items[i].why; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},1000); } else { btn.classList.add('wrong'); fb.className='feedback wrong show'; fb.textContent='Hint: one input cannot produce two outputs.'; recordActivity(false); } }; });
+        } show(); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','You understand functions!')}<p>Vertical line test: if a vertical line crosses more than once → not a function of x.</p><div class="btn-group"><button class="btn btn-success" onclick="finishL8()">Complete Sector 8</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L9(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','A binary operation takes two inputs and produces one result. Closure means the result stays inside the set.')}<h2>➕ Sector 9 — Binary Operations</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Operation Core</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('pointing','Try adding pairs from the set {1,2,3,4}.')}<h2>Operation Core</h2><p>Set S = {1,2,3,4}. Operation: addition.</p><div class="machine"><div class="slots"><div class="slot" id="op-a">?</div><span class="arrow">+</span><div class="slot" id="op-b">?</div><span class="arrow">=</span><div class="slot" id="op-c">?</div></div><div class="input-row"><select id="op-sel-a"><option>1</option><option>2</option><option>3</option><option>4</option></select><select id="op-sel-b"><option>1</option><option>2</option><option>3</option><option>4</option></select><button class="btn" onclick="runOp()">Compute</button></div></div><div class="feedback" id="op-fb"></div><div class="btn-group"><button class="btn" onclick="nextStep()">Answer</button></div></div>`;
+        window.runOp=()=>{ const a=+document.getElementById('op-sel-a').value, b=+document.getElementById('op-sel-b').value, c=a+b; document.getElementById('op-a').textContent=a; document.getElementById('op-b').textContent=b; document.getElementById('op-c').textContent=c; const fb=document.getElementById('op-fb'); if(c>4){ fb.className='feedback hint show'; fb.textContent=`${c} is NOT in S.`; } else { fb.className='feedback correct show'; fb.textContent=`${c} is in S.`; } }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Is addition closed on {1,2,3,4}?')}<h2>Is addition closed on {1,2,3,4}?</h2><div class="choice-grid"><div class="choice-btn" id="cl-yes">Yes</div><div class="choice-btn" id="cl-no">No</div></div><div class="feedback" id="cl-fb"></div><div class="btn-group"><button class="btn" id="cl-next" style="display:none;" onclick="nextStep()">Continue</button></div></div>`;
+        document.getElementById('cl-no').onclick=()=>{ document.getElementById('cl-fb').className='feedback correct show'; document.getElementById('cl-fb').textContent='✓ Not closed (3+4=7).'; recordActivity(true); document.getElementById('cl-next').style.display='inline-flex'; addXP(30); };
+        document.getElementById('cl-yes').onclick=()=>{ document.getElementById('cl-fb').className='feedback wrong show'; document.getElementById('cl-fb').textContent='Every pair must stay in the set.'; recordActivity(false); }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Binary operations and closure are clear!')}<div class="btn-group"><button class="btn btn-success" onclick="finishL9()">Complete Sector 9</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  L10(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','Let’s explore the properties of addition and multiplication.')}<h2>⚖️ Sector 10 — Properties</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Commutative</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','Order does not matter for addition and multiplication.')}<h2>Commutative Property</h2><p>\\(a+b=b+a\\) and \\(ab=ba\\)</p><div class="machine"><p>3+5 = <span id="comm1">?</span></p><p>5+3 = <span id="comm2">?</span></p><button class="btn" onclick="runComm()">Compute</button></div><div class="btn-group"><button class="btn" onclick="nextStep()">Associative & Identity</button></div></div>`;
+        window.runComm=()=>{ document.getElementById('comm1').textContent=8; document.getElementById('comm2').textContent=8; }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','Grouping does not change the result (associative). 0 is the additive identity; 1 is the multiplicative identity.')}<h2>Associative & Identity</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Inverses & Distributive</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('explaining','The distributive property links multiplication and addition.')}<h2>Inverses & Distributive</h2><p class="math-lg">\\(a(b+c)=ab+ac\\)</p><div class="machine"><p>3(4+5)=<span id="dist1">?</span></p><p>3·4+3·5=<span id="dist2">?</span></p><button class="btn" onclick="runDist()">Show</button></div><div class="btn-group"><button class="btn" onclick="nextStep()">Quick Check</button></div></div>`;
+        window.runDist=()=>{ document.getElementById('dist1').textContent=27; document.getElementById('dist2').textContent=27; }; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Which property is illustrated by 7 + 0 = 7?')}<h2>Which property is \\(7+0=7\\)?</h2><div class="choice-grid"><div class="choice-btn" data-a="id">Identity</div><div class="choice-btn" data-a="comm">Commutative</div><div class="choice-btn" data-a="assoc">Associative</div><div class="choice-btn" data-a="inv">Inverse</div></div><div class="feedback" id="prop-fb"></div><div class="btn-group"><button class="btn" id="prop-next" style="display:none;" onclick="nextStep()">Finish</button></div></div>`;
+        document.querySelectorAll('.choice-btn').forEach(btn=>{ btn.onclick=()=>{ const fb=document.getElementById('prop-fb'); if(btn.dataset.a==='id'){ btn.classList.add('correct'); fb.className='feedback correct show'; fb.textContent='✓ Identity.'; recordActivity(true); document.getElementById('prop-next').style.display='inline-flex'; addXP(25); } else { btn.classList.add('wrong'); fb.className='feedback wrong show'; fb.textContent='Adding zero leaves the number unchanged.'; recordActivity(false); } }; }); },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','All properties recovered! You are ready for the Assessment.')}<div class="btn-group"><button class="btn btn-success" onclick="finishL10()">Complete Sector 10</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  },
+
+  ASSESS(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','This is the formal Chapter Assessment. It is worth 50% of your final score. Answer carefully.')}<h2>📋 Chapter Assessment</h2><p>10 questions covering the whole chapter.</p><div class="btn-group"><button class="btn" onclick="nextStep()">Begin Assessment</button></div></div>`; },
+      ()=>{ 
+        if(!state.assessDone){ state.assessCorrect=0; state.assessTotal=0; }
+        container.innerHTML=`<div class="card">${makeMascotHTML('thinking','Take your time. I believe in you!')}<h2>Assessment Questions</h2><div id="ass-q"></div><div class="feedback" id="ass-fb"></div><div class="btn-group"><button class="btn" id="ass-next" style="display:none;" onclick="nextStep()">See Results</button></div></div>`;
+        const qs = [
+          { q: 'Language is a system of symbols, words, signs and rules used to communicate.', a: 'true', type: 'tf' },
+          { q: 'Is “2x + 7” an expression or a sentence?', a: 'expression', type: 'text' },
+          { q: 'What is the conventional form of 3 × x?', a: '3x', type: 'text' },
+          { q: 'Evaluate: 2 + 3 × 4', a: '14', type: 'text' },
+          { q: 'Write the roster form of {x | x is a positive integer and x < 4}', a: '{1,2,3}', type: 'text' },
+          { q: 'Is {(1,5),(2,5),(3,7)} a function? (yes/no)', a: 'yes', type: 'text' },
+          { q: 'Is {(1,2),(1,5)} a function? (yes/no)', a: 'no', type: 'text' },
+          { q: 'What is the additive identity?', a: '0', type: 'text' },
+          { q: 'Which property is shown by a + b = b + a?', a: 'commutative', type: 'text' },
+          { q: 'Is addition closed on the set {1,2,3,4}? (yes/no)', a: 'no', type: 'text' }
+        ];
+        let i = 0;
+        function show(){
+          if(i >= qs.length){
+            state.assessDone = true; save();
+            document.getElementById('ass-q').innerHTML = makeMascotHTML('celebrating',`You finished the assessment! ${state.assessCorrect}/${qs.length} correct.`) + `<p style="color:var(--success);">Assessment complete!</p>`;
+            document.getElementById('ass-next').style.display = 'inline-flex';
+            return;
+          }
+          const item = qs[i];
+          let html = `<p><strong>Question ${i+1} of ${qs.length}</strong></p><p>${item.q}</p>`;
+          if(item.type === 'tf'){
+            html += `<div class="choice-grid"><div class="choice-btn" data-a="true">True</div><div class="choice-btn" data-a="false">False</div></div>`;
+          } else {
+            html += `<div class="input-row"><input type="text" id="ass-ans" placeholder="Your answer"><button class="btn" id="ass-check">Submit</button></div>`;
+          }
+          document.getElementById('ass-q').innerHTML = html;
+          if(item.type === 'tf'){
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+              btn.onclick = () => {
+                const correct = btn.dataset.a === item.a;
+                state.assessTotal++;
+                if(correct){ state.assessCorrect++; btn.classList.add('correct'); document.getElementById('ass-fb').className='feedback correct show'; document.getElementById('ass-fb').textContent='✓ Correct'; }
+                else { btn.classList.add('wrong'); document.getElementById('ass-fb').className='feedback wrong show'; document.getElementById('ass-fb').textContent='Incorrect.'; }
+                save();
+                setTimeout(()=>{ i++; show(); document.getElementById('ass-fb').className='feedback'; }, 900);
+              };
+            });
+          } else {
+            document.getElementById('ass-check').onclick = () => {
+              let v = document.getElementById('ass-ans').value.trim().toLowerCase().replace(/\s+/g,'');
+              let target = item.a.toLowerCase().replace(/\s+/g,'');
+              if(item.a === '{1,2,3}' && (v==='{1,2,3}'||v==='{3,2,1}')) v = '{1,2,3}';
+              if(item.a === 'commutative' && v.includes('commuta')) v = 'commutative';
+              const correct = v === target;
+              state.assessTotal++;
+              if(correct){ state.assessCorrect++; document.getElementById('ass-fb').className='feedback correct show'; document.getElementById('ass-fb').textContent='✓ Correct'; }
+              else { document.getElementById('ass-fb').className='feedback wrong show'; document.getElementById('ass-fb').textContent='Incorrect.'; }
+              save();
+              setTimeout(()=>{ i++; show(); document.getElementById('ass-fb').className='feedback'; }, 900);
+            };
+          }
+        }
+        show();
+      },
+      ()=>{ 
+        const assScore = getAssessScore();
+        container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Assessment complete! Check your score below.')}<h2>Assessment Results</h2>
+          <div class="score-box"><div style="font-size:0.9rem;color:var(--muted);">Assessment Score (50% of final)</div><div class="big">${assScore} / 50</div><p style="margin-top:8px;">${state.assessCorrect} out of ${state.assessTotal} correct</p></div>
+          <div class="btn-group"><button class="btn btn-success" onclick="finishAssess()">Complete Assessment</button></div></div>`; 
+      }
+    ];
+    steps[Math.min(step,steps.length-1)]();
+  },
+
+  FINAL(container, step){
+    const steps=[
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('greeting','You have completed everything. Claim the Master Code!')}<h2>🔑 Final Mission — Master Code</h2><div class="btn-group"><button class="btn" onclick="nextStep()">Claim Master Code</button></div></div>`; },
+      ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','MASTER CODE ACCEPTED! You are now a Master of the Language of Mathematics.')}<h2>Master Code Recovered</h2><p style="font-size:1.3rem;color:var(--gold);text-align:center;margin:20px 0;">MATH-LANG-CITE113</p><div class="btn-group"><button class="btn btn-success" onclick="finishFinal()">Finish Adventure</button></div></div>`; }
+    ]; steps[Math.min(step,steps.length-1)]();
+  }
+};
+
+function finishL1(){ completeLevel('L1'); showScreen('hub'); }
+function finishL2(){ completeLevel('L2'); showScreen('hub'); }
+function finishL3(){ completeLevel('L3'); showScreen('hub'); }
+function finishL4(){ completeLevel('L4'); showScreen('hub'); }
+function finishL5(){ completeLevel('L5'); showScreen('hub'); }
+function finishL6(){ completeLevel('L6'); showScreen('hub'); }
+function finishL7(){ completeLevel('L7'); showScreen('hub'); }
+function finishL8(){ completeLevel('L8'); showScreen('hub'); }
+function finishL9(){ completeLevel('L9'); showScreen('hub'); }
+function finishL10(){ completeLevel('L10'); showScreen('hub'); }
+function finishAssess(){ completeLevel('ASSESS'); showScreen('hub'); }
+function finishFinal(){ 
+  completeLevel('FINAL'); 
+  const overall = getOverallScore();
+  document.getElementById('final-summary').innerHTML=`
+    <p><strong>Explorer:</strong> ${state.name}</p>
+    <p><strong>Overall Score:</strong> ${overall} / 100</p>
+    <p>Activities (50%): ${getActivityScore()} &nbsp;|&nbsp; Assessment (50%): ${getAssessScore()}</p>
+    <p><strong>Rank:</strong> ${getRank()}</p>
+    <p style="margin-top:10px;font-size:0.85rem;color:var(--muted);">CITE Technical Institute, Inc. · Math 113<br>Developed by John Roy Rigodon</p>`; 
+  showScreen('final'); 
+}
+
+document.getElementById('btn-start').onclick=()=>{ const name=document.getElementById('player-name').value.trim()||'Explorer'; state.name=name; state.started=true; save(); showScreen('hub'); };
+document.getElementById('btn-continue').onclick=()=>showScreen('hub');
+document.getElementById('btn-back-hub').onclick=()=>showScreen('hub');
+document.getElementById('btn-badges').onclick=()=>showScreen('badges');
+document.getElementById('btn-back-from-badges').onclick=()=>showScreen('hub');
+document.getElementById('btn-report').onclick=()=>showScreen('report');
+document.getElementById('btn-back-from-report').onclick=()=>showScreen('hub');
+document.getElementById('btn-reset').onclick=resetProgress;
+document.getElementById('btn-final-hub').onclick=()=>showScreen('hub');
+document.getElementById('btn-final-report').onclick=()=>showScreen('report');
+
+if(load()&&state.started){ document.getElementById('btn-continue').style.display='inline-flex'; document.getElementById('player-name').value=state.name; }
+updateTopbars();
+</script>
+</body>
+</html>
