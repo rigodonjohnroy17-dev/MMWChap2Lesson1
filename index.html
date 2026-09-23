@@ -582,7 +582,7 @@ const LEVEL_RENDERERS = {
         const qs=[{q:'Five more than twice a number x',a:['2x+5','2x + 5','5+2x']},{q:'The product of 3 and y',a:['3y','3*y']},{q:'A number n decreased by 7',a:['n-7','n - 7']}];
         let i=0;
         function show(){ if(i>=qs.length){ document.getElementById('w2m-q').innerHTML=makeMascotHTML('celebrating','Perfect translations!')+'<p style="color:var(--success);">✓ Excellent!</p>'; document.getElementById('w2m-next').style.display='inline-flex'; addXP(40); return; }
-          document.getElementById('w2m-q').innerHTML=`<p><strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="w2m-ans" placeholder="e.g. 2x+5"><button class="btn" id="w2m-check">Check</button></div>`;
+          document.getElementById('w2m-q').innerHTML=`<p><strong>${qs[i].q}</strong></p><div class="input-row"><input type="text" id="w2m-ans" placeholder="e.g. 5x³+1"><button class="btn" id="w2m-check">Check</button></div>`;
           document.getElementById('w2m-check').onclick=()=>{ let v=document.getElementById('w2m-ans').value.replace(/\s+/g,'').toLowerCase(); const ok=qs[i].a.some(a=>a.replace(/\s+/g,'').toLowerCase()===v); const fb=document.getElementById('w2m-fb'); if(ok){ fb.className='feedback correct show'; fb.textContent='✓ Correct!'; recordActivity(true); setTimeout(()=>{i++;show();fb.className='feedback';},750); } else { fb.className='feedback wrong show'; fb.textContent='Hint: use conventional notation.'; recordActivity(false); } };
         } show(); },
       ()=>{ container.innerHTML=`<div class="card">${makeMascotHTML('celebrating','Mathematics is precise, concise, and powerful!')}<h2>Summary</h2><div class="btn-group"><button class="btn btn-success" onclick="finishL3()">Complete Sector 3</button></div></div>`; }
